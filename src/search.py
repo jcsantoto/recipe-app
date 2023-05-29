@@ -9,7 +9,7 @@ SEARCH_URL = "https://api.spoonacular.com/recipes/complexSearch?query="
 def search_by_name(query: string) -> list:
     """
     Performs an API call to search for a recipe given a query from the user. Retrieves Recipe Title, Summary, and
-    Image
+    Image.
 
     Args:
         query: The search that the user wants to perform
@@ -29,3 +29,4 @@ def search_by_name(query: string) -> list:
         simplified_recipes.append({'title': r['title'], 'summary': r['summary'], 'image': r['image']})
 
     return simplified_recipes
+
