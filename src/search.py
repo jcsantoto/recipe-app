@@ -11,9 +11,9 @@ def search_by_name(query: string) -> list:
     Performs an API call to search for a recipe given a query from the user. Retrieves Recipe Title, Summary, and
     Image.
 
-    Args:
+    :param
         query: The search that the user wants to perform
-    Returns:
+    :return:
         simplified_recipes: list of recipes where each recipe is a dictionary containing Title, Summary, and Image URL
     """
 
