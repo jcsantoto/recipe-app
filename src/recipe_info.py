@@ -1,5 +1,4 @@
 import requests
-import string
 
 APIKEY = "?apiKey=b9f570c04c8a44229ffd38618ddfabe2"
 
@@ -16,28 +15,28 @@ class Recipe:
         url = SEARCH_URL.replace("{id}", self.id) + APIKEY
         self.recipe_info = requests.get(url).json()
 
-    def get_title(self) -> string:
+    def get_title(self) -> str:
         """
         Method to get recipe title
         :return: Returns recipe title
         """
         return self.recipe_info['title']
 
-    def get_price(self) -> string:
+    def get_price(self) -> str:
         """
         Method to return price of recipe
         :return: Returns recipe price
         """
         return self.recipe_info['pricePerServing'] / 100
 
-    def get_prep_time(self) -> string:
+    def get_prep_time(self) -> str:
         """
         Method to return ready time of a recipe
         :return: Returns ready time
         """
         return self.recipe_info['readyInMinutes']
 
-    def get_summary(self) -> string:
+    def get_summary(self) -> str:
         """
         Method to return recipe summary
         :return: Returns recipe summary
@@ -51,7 +50,7 @@ class Recipe:
         """
         return self.recipe_info['extendedIngredients']
 
-    def get_instructions_html(self) -> string:
+    def get_instructions_html(self) -> str:
         """
         Method to return instructions as a string with html formatting
         :return: Returns instructions as a string
