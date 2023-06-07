@@ -57,3 +57,9 @@ def search_by_ingredient(query: str) -> list:
 
     return simplified_recipes
 
+def search_by_cook_time():
+    """
+    Will sort out cook
+    :return:
+    return cook
+    """
