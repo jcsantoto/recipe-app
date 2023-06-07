@@ -10,7 +10,7 @@ class Recipe:
     This class is used to represent a recipe specified by a recipe id.
     It contains methods to retrieve information about a recipe.
     """
-    def __init__(self, recipe_id: str):
+    def __init__(self, recipe_id: int):
         self.id = recipe_id
         url = SEARCH_URL.replace("{id}", self.id) + APIKEY
         self.recipe_info = requests.get(url).json()
