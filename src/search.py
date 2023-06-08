@@ -19,6 +19,9 @@ def search_by_name(query: str, num_results: int = 10) -> list:
     :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price and Image URL
     """
 
+    if query == "":
+        return []
+
     full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(num_results)
 
     results = _get_results(full_url)
@@ -35,6 +38,9 @@ def search_by_ingredient(query: str, num_results: int = 10) -> list:
     :param num_results: Number of results to return, defaulted to 10
     :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
     """
+
+    if query == "":
+        return []
 
     full_url = SEARCH_URL + BY_INGREDIENTS + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(
         num_results)
@@ -58,8 +64,11 @@ def filter_by_price_range(query: str, min_price: float, max_price: float, num_re
     Title, Summary, Price, and Image URL
     """
 
-    if min_price < 0:
-        return None
+    if min_price < 0 or max_price < min_price:
+        return []
+
+    if query == "":
+        return []
 
     full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&sort=price&addRecipeInformation=true" + "&number=" + str(
         num_results)
