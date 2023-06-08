@@ -16,44 +16,66 @@ def search_by_name(query: str, num_results: int = 10) -> list:
 
     :param query: The search that the user wants to perform
     :param num_results: Number of results to return, defaulted to 10
-    :return: list of recipes where each recipe is a dictionary containing Title, Summary, and Image URL
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price and Image URL
     """
 
-    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&addRecipeInformation=true"
+    if query == "":
+        return []
+
+    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(num_results)
 
     results = _get_results(full_url)
 
     return results
+
 
 def search_by_ingredient(query: str, num_results: int = 10) -> list:
     """
-    Performs an API call to search for a recipe by ingredients given a query from the user formatted as a comma separated list. Retrieves Recipe Title, Summary, and
-    Image.
+    Performs an API call to search for a recipe by ingredients given a query from the user formatted as a comma
+    separated list. Retrieves Recipe Title, Summary, and Image.
 
-    :param query: The search that the user wants to perform, defaulted to 10
-    :return: list of recipes where each recipe is a dictionary containing Title, Summary, and Image URL
+    :param query: The search that the user wants to perform
+    :param num_results: Number of results to return, defaulted to 10
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
     """
 
-    full_url = SEARCH_URL + BY_INGREDIENTS + query + APIKEY + "&addRecipeInformation=true"
+    if query == "":
+        return []
+
+    full_url = SEARCH_URL + BY_INGREDIENTS + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(
+        num_results)
 
     results = _get_results(full_url)
 
     return results
 
-def filter_by_price_range(query: str, min_price: float, max_price: float, num_results: int = 10) -> list:
-    """_summary_
 
-    :param query: _description_
-    :param min_price: _description_
-    :param max_price: _description_
-    :return: _description_
+def filter_by_price_range(query: str, min_price: float, max_price: float, num_results: int = 10) -> list:
+    """
+    Performs an API call to search for a recipe by ingredients given a query from the user and then filters it to the
+    recipes inside the price range specified by min_price and max_price. Retrieves Recipe ID, Title, Summary, Price
+    and Image.
+
+    :param query: The search that the user wants to perform
+    :param min_price: Minimum price to filter by
+    :param max_price: Maximum price to filter by
+    :param num_results: Number of results to return, defaulted to 10
+    :return: list of recipes filtered by price where each recipe is a dictionary containing
+    Title, Summary, Price, and Image URL
     """
 
-    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&sort=price&addRecipeInformation=true"
+    if min_price < 0 or max_price < min_price:
+        return []
+
+    if query == "":
+        return []
+
+    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&sort=price&addRecipeInformation=true" + "&number=" + str(
+        num_results)
 
     results = _get_results(full_url)
 
-    filtered_results = [x for x in results if x["price"] >= min_price and x["price"] <= max_price]
+    filtered_results = [x for x in results if min_price <= x["price"] <= max_price]
 
     # Retrieves more recipes if there are not enough to match the num_results parameter.
     num_additional_calls = 0
@@ -61,10 +83,10 @@ def filter_by_price_range(query: str, min_price: float, max_price: float, num_re
         num_additional_calls += 1
         offset = num_additional_calls * num_results
 
-        additional_results =  _get_results(full_url + "&offset=" + str(offset))
-        filtered_additional_results = [x for x in additional_results if x["price"] >= min_price and x["price"] <= max_price]
+        additional_results = _get_results(full_url + "&offset=" + str(offset))
+        filtered_additional_results = [x for x in additional_results if min_price <= x["price"] <= max_price]
         filtered_results += filtered_additional_results
-        
+
     return filtered_results[:num_results]
 
 
@@ -74,7 +96,7 @@ def _get_results(url: str):
     made using the specified URL.
 
     :param url: URL for API call
-    :return: list of recipes with the title, summary, image, and price attributes
+    :return: list of recipes with the ID, title, summary, image, and price attributes
     """
 
     response = requests.get(url).json()
@@ -82,15 +104,16 @@ def _get_results(url: str):
     simplified_recipes = []
     for r in recipes:
         info = {
-            'title': r['title'], 
-            'summary': r['summary'], 
+            'title': r['title'],
+            'summary': r['summary'],
             'image': r['image'],
-            'price': r['pricePerServing']/100,
+            'price': r['pricePerServing'] / 100,
+            'id': r['id']
         }
         simplified_recipes.append(info)
-    
+
     return simplified_recipes
 
 
 if __name__ == '__main__':
-    print(filter_by_price_range("cake",0,5))
+    search_by_ingredient("flour,water")
