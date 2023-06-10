@@ -5,7 +5,7 @@ from src.flask_files import forms
 from src.flask_files.models import User
 from src.flask_files.database import mongo
 
-
+# Setting up database
 client = mongo.cx
 db = client["recipeapp"]
 accounts = db["accounts"]
@@ -17,14 +17,24 @@ login_manager.login_message_category = 'info'
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    # if user is already logged in, redirect to homepage
     if current_user.is_authenticated:
         return redirect("/")
 
+    # creates login form object
     form = forms.LoginForm()
+
+    # validates form
     if form.validate_on_submit():
+
+        # looks for entries in the database with a matching email from the form
         user = accounts.find_one({"email": form.email.data})
+
+        # checks if user is not null. checks if password matches
         if user and bcrypt.check_password_hash(user["password"], form.password.data):
             user_object = User(user["username"], user["email"], user["password"])
+
+            # logs user in
             login_user(user_object, remember=form.remember.data)
 
             flash("Login Successful")
@@ -52,9 +62,12 @@ def register():
 
     form = forms.RegistrationForm()
     if form.validate_on_submit():
+
+        # encrypts password
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password_hash=hashed_password)
 
+        # inserts new entry in database
         new_entry = user.get_dict()
         accounts.insert_one(new_entry)
 

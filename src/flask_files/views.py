@@ -14,12 +14,17 @@ def about_page():
     return render_template("about.html")
 
 
+@views.route("/account")
+@login_required
+def account_page():
+    username = current_user.username
+    email = current_user.email
+
+    return render_template("account.html", username=username, email=email)
+
+
 @views.route("/results")
 def display_results():
     return render_template("display_results.html")
 
 
-@views.route("/test")
-@login_required
-def test_login():
-    return "<p> Logged In </p>"
