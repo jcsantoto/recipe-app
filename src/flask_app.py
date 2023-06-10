@@ -28,5 +28,14 @@ def register_page():
     return render_template("register.html")
 
 
+@app.route("/about")
+def about_page():
+    return render_template("about.html")
+
+
+@app.route("/results")
+def display_results():
+    return render_template("display_results.html")
+
 if __name__ == '__main__':
     app.run(debug=True)
