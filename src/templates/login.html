@@ -1,36 +1,32 @@
 {% extends "template.html" %}
 
 {% block content %}
-
     <div class = "d-flex justify-content-center" style="margin-top: 3%;">
-        <form class = "form-signin  w-25">
+        <form class = "form-signin  w-25" method="POST" action="">
+            {{ form.hidden_tag() }}
             <h1 class = "h3 mb-3 font-weight-normal">Welcome back, Log in</h1>
 
-
-
             <div class = "form-group form-inline">
-                <label for = "inputEmail">Email:</label>
-                <input type = "email" id = "inputEmail" class = "form-control" placeholder = "Email address" required autofocus>
+                {{ form.email.label(class="form-control-label") }}
+                {{ form.email(class="form-control form-control-lg") }}
             </div>
 
 
             <div class = "form-group form-inline" style="margin-top: 3%;">
-                <label for = "inputPassword">Password:</label>
-                <input type = "password" id = "inputPassword" class = "form-control" placeholder= "Password" required">
+                {{ form.password.label(class="form-control-label") }}
+                {{ form.password(class="form-control form-control-lg") }}
             </div>
 
             <div class = "checkbox mb-3" style="margin-top: 3%;">
-                <label>
-                    <input type = "checkbox" value = "remember-me">
-                    Remember me
-                </label>
+                {{ form.remember(class="form-check-input") }}
+                {{ form.remember.label(class="form-check-label") }}
             </div>
 
-            <button class = "btn btn-lg btn-primary btn-block" type = "submit">Sign in</button>
+            {{ form.submit(class="btn btn-outline-info") }}
 
             <div>
-                <p style="margin-top: 3%;">Don't have an account with us already? <a href = "register.html">Register here.</a></p>
-                <p style="margin-top: 3%;">Forgot your password? <a href = "register.html">Reset it here.</a></p>
+                <p style="margin-top: 3%;">Don't have an account with us already? <a href = "/register">Register here.</a></p>
+                <p style="margin-top: 3%;">Forgot your password? <a href = "/register">Reset it here.</a></p>
             </div>
 
         </form>

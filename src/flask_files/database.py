@@ -1,11 +1,12 @@
 from flask_pymongo import PyMongo
 
+URI = "mongodb+srv://recipeapp:94cQWKQqdXeLGrhV@recipeapp.wsu3zml.mongodb.net/?retryWrites=true&w=majority"
 mongo = PyMongo()
 
-client = mongo.cx
-db = client["recipeapp"]
-accounts = db["accounts"]
+
+def init_app(app):
+    mongo.init_app(app, URI)
 
 
-def init_app(app, uri):
-    mongo.init_app(app, uri)
+
+
