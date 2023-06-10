@@ -1,0 +1,58 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+    <div class = "d-flex justify-content-center">
+
+        <div class = "container">
+
+            <div class = "row">
+                <h1>Account Information</h1>
+
+            </div>
+
+            <div class = "row">
+                <div class = "col-md-2">
+                    <h2>Username: </h2>
+                </div>
+                <div class = "col-md-4">
+                    <input type = "text" class = "form-control" value = "Example_Username" readonly/>
+                </div>
+            </div>
+
+            <div class = "row">
+                <div class = "col-md-2">
+                    <h2>Email: </h2>
+                </div>
+                <div class = "col-md-4">
+                    <input type = "text" class = "form-control" value = "Example_Email@email.com" readonly/>
+                </div>
+            </div>
+
+            <div class = "row">
+                <div class = "col-md-2">
+                    <h2>Allergies: </h2>
+                </div>
+                <div class = "col-md-4">
+                    <input type = "text" class = "form-control" value = "Allergen1, Allergen2, Allergen3" readonly/>
+                </div>
+            </div>
+
+            <div class = "row" style="margin-top: 3%;">
+                <h2>Favorite Recipes</h2>
+            </div>
+
+            <div class = "row" style = "margin-left: 1%;">
+                <ul>
+                    <li>Favorite Recipe 1</li>
+                    <li>Favorite Recipe 2</li>
+                    <li>Favorite Recipe 3</li>
+                </ul>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+{% endblock %}
