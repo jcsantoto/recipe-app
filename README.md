@@ -14,6 +14,7 @@ From there, there is a navigation bar that will allow you to visit various other
  * About Us: Displays information about the website as well as the development team.
  * Register: Allows the user to register for an account to access various features.
  * Login: Allows the user to login to their account and access various features.
+ 
  <b> When logged in: </b>
  * Account: Displays information about the user such as their username and email.
  * Logout: Logs the user out of their account.
