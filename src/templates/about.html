@@ -1,0 +1,59 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+    <div class = "d-flex justify-content-center">
+
+        <div class = "d-flex flex-column">
+            <div class = "d-flex justify-content-center">
+                <h1>About Us</h1>
+            </div>
+
+            <div class = "d-flex flex-column justify-content-center">
+                <div class = "d-flex flex-row justify-content-center">
+                    <h2>What This Project Is</h2>
+                </div>
+                <div class = "d-flex flex-row justify-content-center">
+                    <p>This project seeks to make the acquirement of recipes and its related information easier for users coming from many different backgrounds.</p>
+                </div>
+            </div>
+
+            <div class = "d-flex flex-column justify-content-center">
+                <div class = "d-flex flex-row justify-content-center">
+                    <h2>Contributors</h2>
+                </div>
+
+                <div>
+                    <div class = "d-flex flex-row justify-content-center">
+                        <h3>Example Team Member</h3>
+                    </div>
+                    <div class = "d-flex flex-row justify-content-center">
+                        <h4>Example Role/Title/Position</h4>
+                    </div>
+                    <div class = "d-flex flex-row justify-content-center">
+                        <img src = "{{url_for('static', filename='/images/genshin_quest.jpg')}}">
+                    </div>
+                    <div class = "d-flex flex-row justify-content-center" style="margin-top: 3%;">
+                        <ul>
+                            <li>This person was responsible for thing 1.</li>
+                            <li>This person was responsible for thing 2.</li>
+                            <li>This person was responsible for thing 3.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class = "d-flex flex-row justify-content-center">
+                    <h2>Contact Us</h2>
+                </div>
+                <div class = "d-flex flex-row justify-content-center">
+                    <p>To contact Food Craft, please email us at whoisjoe@joemama.com</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
