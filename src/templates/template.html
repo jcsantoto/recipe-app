@@ -33,6 +33,19 @@
                     <a class = "nav-link" href = "#" id = "navItem">Search by Ingredient</a>
                 </li>
 
+                {% if current_user.is_authenticated %}
+
+                <li class = "nav-item" style="margin-left: 10px;">
+                    <a class = "nav-link" href = "/account" id = "navItem">My Account</a>
+                </li>
+
+                <li class = "nav-item" style="margin-left: 10px;">
+                    <a class = "nav-link" href = "/logout" id = "navItem">Logout</a>
+                </li>
+
+
+                {% else %}
+
                 <li class = "nav-item" style="margin-left: 10px;">
                     <a class = "nav-link" href = "/register" id = "navItem">Register</a>
                 </li>
@@ -41,10 +54,10 @@
                     <a class = "nav-link" href = "/login" id = "navItem">Login</a>
                 </li>
 
+                {% endif %}
                 <li class = "nav-item" style="margin-left: 10px;">
                     <a class = "nav-link" href = "/about" id = "navItem">About Us</a>
                 </li>
-
 
             </ul>
 
@@ -55,6 +68,9 @@
         </div>
     </nav>
 
+    {% if current_user.is_authenticated %}
+        <p> Welcome {{ current_user.username }}</p>
+    {% endif %}
 
     <br>
     <br>
