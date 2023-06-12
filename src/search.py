@@ -1,6 +1,7 @@
 import requests
 from api_url_builder import RecipeSearch, SortOptions, SearchMode
 
+
 def search_by_name(query: str, num_results: int = 10) -> list:
     """
     Performs an API call to search for a recipe by name given a query from the user. Retrieves Recipe Title, Summary, and
@@ -44,40 +45,62 @@ def search_by_ingredient(query: str, num_results: int = 10) -> list:
 
 
 def sort_by_total_fat(query: str, mode: SearchMode, num_results: int = 10) -> list:
-
+    """
+    Performs an API call to search for a recipe in one of the two modes specified by mode and return results sorted by
+    total fat. Retrieves Recipe Title, Summary, and Image.
+    :param query: Name of recipe or List of ingredients
+    :param mode: The type of search to perform (name / ingredients)
+    :param num_results: Number of results to return, defaulted to 10
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
+    """
     if query == "":
         return []
 
-    url = _build_sort_url(query, SearchMode, SortOptions.total_fat, num_results)
+    url = _build_sort_url(query, mode, SortOptions.total_fat, num_results)
 
     results = _get_results(url)
 
     return results
 
 
-def sort_by_carbs(query: str, mode: int, num_results: int = 10) -> list:
-
+def sort_by_carbs(query: str, mode: SearchMode, num_results: int = 10) -> list:
+    """
+    Performs an API call to search for a recipe in one of the two modes specified by mode and return results sorted by
+    carbs. Retrieves Recipe Title, Summary, and Image.
+    :param query: Name of recipe or List of ingredients
+    :param mode: The type of search to perform (name / ingredients)
+    :param num_results: Number of results to return, defaulted to 10
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
+    """
     if query == "":
         return []
 
-    url = _build_sort_url(query, SearchMode, SortOptions.carbs, num_results)
+    url = _build_sort_url(query, mode, SortOptions.carbs, num_results)
 
     results = _get_results(url)
 
     return results
 
 
-def sort_by_protein(query: str, num_results: int = 10) -> list:
-
+def sort_by_protein(query: str, mode: SearchMode, num_results: int = 10) -> list:
+    """
+    Performs an API call to search for a recipe in one of the two modes specified by mode and return results sorted by
+    protein. Retrieves Recipe Title, Summary, and Image.
+    :param query: Name of recipe or List of ingredients
+    :param mode: The type of search to perform (name / ingredients)
+    :param num_results: Number of results to return, defaulted to 10
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
+    """
     if query == "":
         return []
 
     url = RecipeSearch()
-    url = _build_sort_url(query, SearchMode, SortOptions.protein, num_results)
+    url = _build_sort_url(query, mode, SortOptions.protein, num_results)
 
     results = _get_results(url)
 
     return results
+
 
 def filter_by_price_range(url: str, min_price: float, max_price: float, num_results: int = 10) -> list:
     """
@@ -116,6 +139,14 @@ def filter_by_price_range(url: str, min_price: float, max_price: float, num_resu
 
 
 def _build_sort_url(query: str, mode: SearchMode, sort_type: SortOptions, num_results: int) -> str:
+    """
+    Helps build the url for the sort functions
+    :param query: Name of recipe or List of ingredients
+    :param mode: The type of search to perform (name / ingredients)
+    :param sort_type: Element to sort by
+    :param num_results: Number of results to return
+    :return: The url for the API call
+    """
     url = RecipeSearch()
 
     if mode == SearchMode.search_by_name:
@@ -124,6 +155,7 @@ def _build_sort_url(query: str, mode: SearchMode, sort_type: SortOptions, num_re
         url.add_ingredient_search(query).add_sort(sort_type.value).add_recipe_info().set_num_results(num_results)
 
     return url.get_url()
+
 
 def _get_results(url: str):
     """
@@ -149,6 +181,3 @@ def _get_results(url: str):
 
     return simplified_recipes
 
-
-if __name__ == '__main__':
-    print(sort_by_nutritional_value("chicken", SortOptions.price))
