@@ -10,7 +10,7 @@ client = mongo.cx
 db = client["recipeapp"]
 accounts = db["accounts"]
 
-auth = Blueprint('auth', __name__, template_folder="../templates")
+auth = Blueprint('auth', __name__, template_folder="../templates", static_folder="../static")
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
@@ -38,7 +38,7 @@ def login():
             login_user(user_object, remember=form.remember.data)
 
             flash("Login Successful")
-            redirect("/")
+            return redirect("/")
 
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
@@ -56,20 +56,21 @@ def logout():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-
     if current_user.is_authenticated:
         return redirect("/")
 
     form = forms.RegistrationForm()
     if form.validate_on_submit():
-
         # encrypts password
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password_hash=hashed_password)
 
+        new_user_info = {"username": form.username.data,
+                         "email": form.email.data,
+                         "password": hashed_password,
+                         "intolerances": []
+                         }
         # inserts new entry in database
-        new_entry = user.get_dict()
-        accounts.insert_one(new_entry)
+        accounts.insert_one(new_user_info)
 
         flash('Your account has been created! You are now able to log in', 'success')
 
