@@ -1,7 +1,7 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
 
-views = Blueprint('views', __name__, template_folder="../templates")
+views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
 
 @views.route("/")

@@ -10,7 +10,7 @@ client = mongo.cx
 db = client["recipeapp"]
 accounts = db["accounts"]
 
-auth = Blueprint('auth', __name__, template_folder="../templates")
+auth = Blueprint('auth', __name__, template_folder="../templates", static_folder="../static")
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
