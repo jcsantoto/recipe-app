@@ -1,62 +1,113 @@
 import requests
-
-APIKEY = "&apiKey=b9f570c04c8a44229ffd38618ddfabe2"
-
-SEARCH_URL = "https://api.spoonacular.com/recipes/complexSearch"
-
-BY_NAME = "?query="
-
-BY_INGREDIENTS = "?includeIngredients="
+from api_url_builder import RecipeSearch, SortOptions, SearchMode, DietOptions, FilterOptions
 
 
-def search_by_name(query: str, num_results: int = 10) -> list:
+def search_by_name(query: str, sort: SortOptions = None,
+                   filters: list[FilterOptions] = None,
+                   filter_settings: list[dict] = None,
+                   num_results: int = 10) -> list:
     """
-    Performs an API call to search for a recipe by name given a query from the user. Retrieves Recipe Title, Summary, and
-    Image.
-
-    :param query: The search that the user wants to perform
-    :param num_results: Number of results to return, defaulted to 10
+    Performs an API call to search for a recipe by its name. Sorting options and Filtering options can be specified.
+    :param query: Name of the recipe
+    :param sort: Type of sort to perform
+    :param filters: List of filters to apply
+    :param filter_settings: List of filter parameters represented as dicts. For diet specify the key as 'diet'.
+    For all other filters, specify a min and max value using the keys 'min' and 'max' respectively.
+    :param num_results: Number of results to return
     :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price and Image URL
     """
 
     if query == "":
         return []
 
-    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(num_results)
+    url = RecipeSearch()
+    url.add_query(query).add_recipe_info().set_num_results(num_results)
 
-    results = _get_results(full_url)
+    if sort:
+        url.add_sort(sort.value)
+
+    if filters:
+        max_price, min_price, price_filter_flag = add_filters(filters=filters, filter_settings=filter_settings, url=url)
+
+        if price_filter_flag:
+            return filter_by_price_range(url.get_url(), min_price, max_price, num_results)
+
+    results = _get_results(url.get_url())
 
     return results
 
 
-def search_by_ingredient(query: str, num_results: int = 10) -> list:
+def search_by_ingredient(query: str, sort: SortOptions = None,
+                         filters: list[FilterOptions] = None,
+                         filter_settings: list[dict] = None,
+                         num_results: int = 10) -> list:
     """
-    Performs an API call to search for a recipe by ingredients given a query from the user formatted as a comma
-    separated list. Retrieves Recipe Title, Summary, and Image.
-
-    :param query: The search that the user wants to perform
-    :param num_results: Number of results to return, defaulted to 10
-    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price, and Image URL
+    Performs an API call to search for a recipe by its name. Sorting options and Filtering options can be specified.
+    :param query: Name of the recipe
+    :param sort: Type of sort to perform
+    :param filters: List of filters to apply
+    :param filter_settings: List of filter parameters represented as dicts. For diet specify the key as 'diet'.
+    For all other filters, specify a min and max value using the keys 'min' and 'max' respectively.
+    :param num_results: Number of results to return
+    :return: list of recipes where each recipe is a dictionary containing ID, Title, Summary, Price and Image URL
     """
-
     if query == "":
         return []
 
-    full_url = SEARCH_URL + BY_INGREDIENTS + query + APIKEY + "&addRecipeInformation=true" + "&number=" + str(
-        num_results)
+    url = RecipeSearch()
+    url.add_ingredient_search(query).add_recipe_info().set_num_results(num_results)
 
-    results = _get_results(full_url)
+    if sort:
+        url.add_sort(sort.value)
 
-    return results
+    if filters:
+        max_price, min_price, price_filter_flag = add_filters(filters=filters, filter_settings=filter_settings, url=url)
+
+        if price_filter_flag:
+            return filter_by_price_range(url.get_url(), min_price, max_price, num_results)
+
+    # results = _get_results(url.get_url())
+
+    return None
 
 
-def filter_by_price_range(query: str, min_price: float, max_price: float, num_results: int = 10) -> list:
+def add_filters(filters: list[FilterOptions], filter_settings: list[dict], url: str) -> tuple[int, int, bool]:
     """
-    Performs an API call to search for a recipe by ingredients given a query from the user and then filters it to the
-    recipes inside the price range specified by min_price and max_price. Retrieves Recipe ID, Title, Summary, Price
-    and Image.
+    Structures URL to have the necessary elements to perform all filters specified.
+    :param filters: List of filter options
+    :param filter_settings: List of filter parameters
+    :param url: RecipeSearch object to represent URL
+    :return: min and max values for price filter and a flag for price filter.d
+    """
+    num_filters = len(filters)
+    price_filter_flag = False
+    min_price = -1
+    max_price = -1
+    for i in range(num_filters):
 
-    :param query: The search that the user wants to perform
+        if filters[i] == FilterOptions.Diet:
+            diet_list = filter_settings[i]["diet"]
+            diets = "|".join([x.value for x in diet_list])
+            url.add_diets(diets)
+
+        elif filters[i] == FilterOptions.Price:
+            price_filter_flag = True
+            min_price = filter_settings[i]["min"]
+            max_price = filter_settings[i]["max"]
+
+        else:
+            min_val = filter_settings[i]["min"]
+            max_val = filter_settings[i]["max"]
+            url.add_filter(filters[i].value, min_val, max_val)
+    return max_price, min_price, price_filter_flag
+
+
+def filter_by_price_range(url: str, min_price: float, max_price: float, num_results: int = 10) -> list:
+    """
+    Performs an API call using the URL of a previous API call that returned a dataset that is required to be filtered
+    by a price range defined by min_price and max_price. Retrieves Recipe ID, Title, Summary, Price and Image.
+
+    :param url: API call url
     :param min_price: Minimum price to filter by
     :param max_price: Maximum price to filter by
     :param num_results: Number of results to return, defaulted to 10
@@ -67,13 +118,10 @@ def filter_by_price_range(query: str, min_price: float, max_price: float, num_re
     if min_price < 0 or max_price < min_price:
         return []
 
-    if query == "":
+    if url == "":
         return []
 
-    full_url = SEARCH_URL + BY_NAME + query + APIKEY + "&sort=price&addRecipeInformation=true" + "&number=" + str(
-        num_results)
-
-    results = _get_results(full_url)
+    results = _get_results(url)
 
     filtered_results = [x for x in results if min_price <= x["price"] <= max_price]
 
@@ -83,7 +131,7 @@ def filter_by_price_range(query: str, min_price: float, max_price: float, num_re
         num_additional_calls += 1
         offset = num_additional_calls * num_results
 
-        additional_results = _get_results(full_url + "&offset=" + str(offset))
+        additional_results = _get_results(url + "&offset=" + str(offset))
         filtered_additional_results = [x for x in additional_results if min_price <= x["price"] <= max_price]
         filtered_results += filtered_additional_results
 
@@ -113,7 +161,3 @@ def _get_results(url: str):
         simplified_recipes.append(info)
 
     return simplified_recipes
-
-
-if __name__ == '__main__':
-    search_by_ingredient("flour,water")

@@ -3,7 +3,8 @@ from src.flask_files import database, extensions
 
 
 def create_app():
-    app = Flask(__name__, template_folder='./templates', static_folder="../static")
+    app = Flask(__name__, template_folder="../templates", static_folder="../static")
+
 
     SECRET_KEY = "i6!IgiclHbbC+Out@O$@cz4^@:Bz(GSM5Ts{>1@cHI=QY0{t'>+NR27{lY^|s,C"
     URI = "mongodb+srv://recipeapp:94cQWKQqdXeLGrhV@recipeapp.wsu3zml.mongodb.net/?retryWrites=true&w=majority"
@@ -19,8 +20,10 @@ def create_app():
 
     from src.flask_files.auth import auth as auth_blueprint
     from src.flask_files.views import views as views_blueprint
+    from src.flask_files.accounts import accounts as accounts_blueprint
     app.register_blueprint(views_blueprint)
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(accounts_blueprint)
 
     return app
 
