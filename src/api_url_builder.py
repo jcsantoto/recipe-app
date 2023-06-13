@@ -9,9 +9,11 @@ class RecipeSearch:
     """
     Class used to easily build API calls for recipe searching in the Spoonacular API
     """
+    default_url = "https://api.spoonacular.com/recipes/complexSearch"
 
-    def __init__(self):
-        self.url = "https://api.spoonacular.com/recipes/complexSearch"
+    def __init__(self, url=default_url):
+        self.url = url
+        self.url.replace(APIKEY, "")
 
     def add_query(self, query: str) -> RecipeSearch:
         """
@@ -38,6 +40,28 @@ class RecipeSearch:
         :return: self
         """
         self.url += "&sort=" + sort
+        return self
+
+    def add_filter(self, filter: str, min: int, max: int):
+        """
+
+        :param filter:
+        :param min:
+        :param max:
+        :return:
+        """
+        self.url += "&min" + filter + "=" + min
+        self.url += "&max" + filter + "=" + max
+
+        return self
+
+    def add_diets(self, diet: str) -> RecipeSearch:
+        """
+        Specifies which diet to filter by in the API call
+        :param diet: Diet type
+        :return: self
+        """
+        self.url += "&diet=" + diet
         return self
 
     def add_recipe_info(self) -> RecipeSearch:
@@ -73,6 +97,7 @@ class RecipeSearch:
         return self.url + APIKEY
 
 
+
 class InfoSearch:
     """
     Class used to easily build API calls for searching up the details of a specific recipe in the Spoonacular API
@@ -100,6 +125,25 @@ class SortOptions(Enum):
     sodium = "sodium"
     calories = "calories"
     protein = "protein"
+
+
+class DietOptions(Enum):
+    GlutenFree = "glutenfree"
+    Ketogenic = "ketogenic"
+    Vegetarian = "vegetarian"
+    LactoVegetarian = "lacto-vegetarian"
+    OvoVegetarian = "ovo-vegetarian"
+    Vegan = "vegan"
+    Pescetarian = "pescetarian"
+    Paleo = "paleo"
+    Primal = "primal"
+    Whole30 = "whole30"
+
+
+class FilterOptions(Enum):
+    Diet = 0
+    Calories = "Calories"
+    Price = 1
 
 
 class SearchMode(Enum):
