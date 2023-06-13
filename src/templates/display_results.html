@@ -1,7 +1,88 @@
 {% extends "template.html" %}
 
 {% block content %}
-
+<div style = "margin-left: 1%;">
 <h1> Results </h1>
+</div>
+
+<div class = "row" style = "margin-left: 1%; margin-right: 1%;">
+    <div class = "col">
+        <div class = "row">
+            <h2>Sort Options</h2>
+        </div>
+
+        <!--First section for price sort-->
+        <div class = "row">
+            <div class = "row">
+                <h3>Price</h3>
+            </div>
+            <div class = "row">
+                <div class = "col">
+                    <input type = "text" class = "form-control" value = "Minimum Price"/>
+                </div>
+                <div class = "col">
+                    <input type = "text" class = "form-control" value = "Maximum Price"/>
+                </div>
+            </div>
+        </div>
+
+        <!--Second section for ingredient filter-->
+        <div class = "row" style = "margin-top: 3%;">
+            <div class = "row">
+                <h3>Ingredients</h3>
+            </div>
+            <div class = "row">
+                <input type = "text" class = "form-control" value = "Please type in some tags"/>
+            </div>
+        </div>
+
+        <!--Third section for nutritional filter-->
+        <div class = "row" style = "margin-top: 3%;">
+            <div class = "row">
+                <h3>Nutritional Filter</h3>
+            </div>
+            <div class = "row">
+                <div class = "row">
+                    <div class = "col"><h4>Calories</h4></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum calories"/></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum calories"/></div>
+                </div>
+
+                <div class = "row" style = "margin-top: 1%;">
+                    <div class = "col"><h4>Carbs</h4></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum carbs"/></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum carbs"/></div>
+                </div>
+
+                <div class = "row" style = "margin-top: 1%;">
+                    <div class = "col"><h4>Fat</h4></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum fat"/></div>
+                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum fat"/></div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <div class = "col">
+        <div class = "row">
+            <h2>Result Display</h2>
+        </div>
+        <div class = "row">
+            <div class = "col-md-4">
+                <img src = "{{url_for('static', filename='/images/sonic_curry.jpg')}}" style = "max-width: 250px; max-height: 250px;">
+            </div>
+            <div class = "col">
+                <div class = "row"><h3>Title of food goes here</h3></div>
+                <div class = "row"><h4>Description of food would go here</h4></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 
 {% endblock %}
