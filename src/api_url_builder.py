@@ -1,7 +1,6 @@
 from __future__ import annotations
 from enum import Enum
 
-
 APIKEY = "&apiKey=b9f570c04c8a44229ffd38618ddfabe2"
 
 
@@ -42,26 +41,59 @@ class RecipeSearch:
         self.url += "&sort=" + sort
         return self
 
-    def add_filter(self, filter: str, min: int, max: int):
+    def add_filter(self, filter_type: str, min_val: int, max_val: int):
         """
 
-        :param filter:
-        :param min:
-        :param max:
+        :param filter_type:
+        :param min_val:
+        :param max_val:
         :return:
         """
-        self.url += "&min" + filter + "=" + min
-        self.url += "&max" + filter + "=" + max
+        if min_val:
+            self.url += "&min" + filter_type + "=" + str(min_val)
+        if max_val:
+            self.url += "&max" + filter_type + "=" + str(max_val)
 
         return self
 
-    def add_diets(self, diet: str) -> RecipeSearch:
+    def add_filters(self, filters: list[FilterOptions], filter_settings: list[dict]) -> RecipeSearch:
+        """
+        Structures URL to have the necessary elements to perform all filters specified.
+        :param filters: List of filter options
+        :param filter_settings: List of filter parameters
+        :return: min and max values for price filter and a flag for price filter.d
+        """
+        num_filters = len(filters)
+        for i in range(num_filters):
+
+            if filters[i] != FilterOptions.Price:
+                min_val = filter_settings[i]["min"]
+                max_val = filter_settings[i]["max"]
+                self.add_filter(filters[i].value, min_val, max_val)
+
+        return self
+
+    def add_diets(self, diets: list[DietOptions]) -> RecipeSearch:
         """
         Specifies which diet to filter by in the API call
-        :param diet: Diet type
+        :param diets: Diet types
         :return: self
         """
-        self.url += "&diet=" + diet
+
+        diet_str = "|".join([x.value for x in diets])
+
+        self.url += "&diet=" + diet_str
+        return self
+
+    def exclude_ingredients(self, ingredients: str) -> RecipeSearch:
+        """
+
+        :param ingredients:
+        :return:
+        """
+
+        self.url += "&excludeIngredients=" + ingredients.replace(" ", "")
+
         return self
 
     def add_recipe_info(self) -> RecipeSearch:
@@ -97,17 +129,24 @@ class RecipeSearch:
         return self.url + APIKEY
 
 
-
 class InfoSearch:
     """
     Class used to easily build API calls for searching up the details of a specific recipe in the Spoonacular API
     """
+
     def __init__(self, id: int) -> None:
         self.url = "https://api.spoonacular.com/recipes/{id}/information"
         self.url.replace("{id}", str(id))
 
     def set_id(self, id: int):
         self.url.replace("{id}", str(id))
+
+
+class FilterOptions(Enum):
+    Calories = "Calories"
+    Carbs = "Carbs"
+    Fat = "Fat"
+    Price = "price"
 
 
 class SortOptions(Enum):
@@ -140,19 +179,9 @@ class DietOptions(Enum):
     Whole30 = "whole30"
 
 
-class FilterOptions(Enum):
-    Diet = 0
-    Calories = "Calories"
-    Price = 1
-
-
 class SearchMode(Enum):
     """
     Class used to maintain consistency on the type of search we are performing on the API.
     """
-    search_by_ingredients = 0
-    search_by_name = 1
-    
-
-
-
+    ByIngredients = 0
+    ByName = 1
