@@ -1,9 +1,11 @@
-from flask import Blueprint, request, url_for, redirect, render_template, flash
+from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
 from flask_login import current_user, login_required
 import src.flask_files.forms as forms
 from src.flask_files.database import mongo
 import src.search as recipe_search
 from src.api_url_builder import SortOptions, FilterOptions, SearchMode
+from src.recipe_info import Recipe
+import pdfkit
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -68,10 +70,51 @@ def search():
         results = recipe_search.search(query=query, mode=SearchMode.ByName, sort=sort, filters=filters,
                                        filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients)
 
-
         return render_template('display_results.html', query=query, results=results, form=form)
 
     else:
         results = recipe_search.search(query, mode=SearchMode.ByName)
 
     return render_template('display_results.html', query=query, results=results, form=form)
+
+
+@views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
+def display_recipe(recipe_id):
+
+    recipe_info = Recipe(recipe_id)
+
+    title = recipe_info.get_title()
+    summary = recipe_info.get_summary()
+    ingredients = recipe_info.get_ingredients()
+    instructions = recipe_info.get_instructions_list()
+    time = recipe_info.get_prep_time()
+
+    session["title"] = title
+    session["summary"] = summary
+    session["ingredients"] = ingredients
+    session["instructions"] = instructions
+    session["time"] = time
+
+    return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
+                           instructions=instructions)
+
+
+@views.route("/pdf")
+def shopping_list():
+
+    title = session["title"]
+    summary = session["summary"]
+    ingredients = session["ingredients"]
+    instructions = session["instructions"]
+    time = session["time"]
+
+    rendered = render_template("shopping_list.html", title=title, summary=summary, time=time, ingredients=ingredients,
+                             instructions=instructions)
+
+
+    pdf = pdfkit.from_string(rendered, False)
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=shoppinglist.pdf'
+
+    return response

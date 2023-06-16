@@ -1,0 +1,50 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-1">
+        <h2> Recipe Info </h2>
+    </div>
+    <div class="col-md-10">
+        <a href="/pdf"> Print PDF </a>
+    </div>
+
+</div>
+
+<h3> {{ title }} </h3>
+
+
+<h2> Summary </h2>
+
+<p> {{ summary|safe }} </p>
+
+<h2> Ingredients </h2>
+
+    {% for ingr in ingredients %}
+        <p>
+        <ul style="list-style-type:square">
+        <li>
+        {{ ingr["amount"] }}
+        {{ ingr["unit"] }}
+        {{ ingr["name"] }}
+        </li>
+        </ul>
+        </p>
+    {% endfor %}
+
+<h2> Instructions </h2>
+
+    {% for instr in instructions %}
+    <p>
+        <b> Step {{ instr["number"] }} </b>
+        <br>
+        <div style="margin-top: 1px;"> {{ instr["step"] }} </div>
+    </p>
+    {% endfor %}
+
+
+
+
+{% endblock %}
