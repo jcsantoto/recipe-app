@@ -2,7 +2,7 @@ import requests
 from src.api_url_builder import RecipeSearch, SortOptions, SearchMode, DietOptions, FilterOptions
 
 
-def search(query: str, mode: SearchMode, sort: SortOptions = None,
+def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
            filters: list[FilterOptions] = None,
            filter_settings: list[dict] = None,
            diets: list[DietOptions] = None,

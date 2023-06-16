@@ -2,7 +2,7 @@ from flask import Blueprint, request, url_for, redirect, render_template, flash
 from flask_login import current_user, login_required
 import src.flask_files.forms as forms
 from src.flask_files.database import mongo
-from src.search import search
+import src.search as recipe_search
 from src.api_url_builder import SortOptions, FilterOptions, SearchMode
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
@@ -38,7 +38,10 @@ def search():
         diets = form.diet.data
 
         # sort
-        sort = SortOptions(form.sort.data)
+        if form.sort.data != SortOptions.default:
+            sort = SortOptions(form.sort.data)
+        else:
+            sort = None
 
         # ingredient filter
         ingredients = form.ingredients.data
@@ -62,12 +65,13 @@ def search():
                 filter_settings.append({"min": min_val,
                                         "max": max_val})
 
-        results = search(query=query, mode=SearchMode.ByName, sort=sort, filters=filters,
-                         filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients)
+        results = recipe_search.search(query=query, mode=SearchMode.ByName, sort=sort, filters=filters,
+                                       filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients)
+
 
         return render_template('display_results.html', query=query, results=results, form=form)
 
     else:
-        results = search(query, mode=SearchMode.ByName)
+        results = recipe_search.search(query, mode=SearchMode.ByName)
 
     return render_template('display_results.html', query=query, results=results, form=form)
