@@ -6,6 +6,7 @@ import src.search as recipe_search
 from src.api_url_builder import SortOptions, FilterOptions, SearchMode
 from src.recipe_info import Recipe
 import pdfkit
+from src.recipe_info_formatter import clean_summary
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -80,11 +81,10 @@ def search():
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
-
     recipe_info = Recipe(recipe_id)
 
     title = recipe_info.get_title()
-    summary = recipe_info.get_summary()
+    summary = clean_summary(recipe_info.get_summary())
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
     time = recipe_info.get_prep_time()
@@ -101,7 +101,6 @@ def display_recipe(recipe_id):
 
 @views.route("/pdf")
 def shopping_list():
-
     title = session["title"]
     summary = session["summary"]
     ingredients = session["ingredients"]
@@ -109,8 +108,7 @@ def shopping_list():
     time = session["time"]
 
     rendered = render_template("shopping_list.html", title=title, summary=summary, time=time, ingredients=ingredients,
-                             instructions=instructions)
-
+                               instructions=instructions)
 
     pdf = pdfkit.from_string(rendered, False)
     response = make_response(pdf)
