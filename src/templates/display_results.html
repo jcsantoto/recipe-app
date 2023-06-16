@@ -1,6 +1,7 @@
 {% extends "template.html" %}
 
 {% block content %}
+<script src = "../styles/frontend_code.js"></script>
 <div style = "margin-left: 1%;">
 <h1> Results </h1>
 </div>
@@ -9,6 +10,16 @@
     <div class = "col">
         <div class = "row">
             <h2>Sort Options</h2>
+        </div>
+
+        <div class = "row">
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                <label class="btn btn-outline-success" for="btnradio1">Search for recipes by name</label>
+
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                <label class="btn btn-outline-success" for="btnradio2">Search for recipes by ingredient</label>
+            </div>
         </div>
 
         <!--First section for price sort-->
