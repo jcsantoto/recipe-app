@@ -38,6 +38,7 @@ class RecipeSearch:
         :param sort: Type of sort
         :return: self
         """
+
         self.url += "&sort=" + sort
         return self
 
@@ -153,26 +154,27 @@ class SortOptions(Enum):
     """
     Class used to maintain consistency on the types of sorting options that Spoonacular API offers.
     """
+    default = "--"
     popularity = "popularity"
-    healthiness = "healthiness"
     price = "price"
     time = "time"
+    healthiness = "healthiness"
     carbs = "carbs"
-    cholesterol = "cholesterol"
-    total_fat = "total-fat"
-    sugar = "sugar"
-    sodium = "sodium"
     calories = "calories"
+    cholesterol = "cholesterol"
     protein = "protein"
+    sodium = "sodium"
+    sugar = "sugar"
+    total_fat = "total-fat"
 
 
 class DietOptions(Enum):
+    Vegetarian = "vegetarian"
+    Vegan = "vegan"
     GlutenFree = "glutenfree"
     Ketogenic = "ketogenic"
-    Vegetarian = "vegetarian"
     LactoVegetarian = "lacto-vegetarian"
     OvoVegetarian = "ovo-vegetarian"
-    Vegan = "vegan"
     Pescetarian = "pescetarian"
     Paleo = "paleo"
     Primal = "primal"
