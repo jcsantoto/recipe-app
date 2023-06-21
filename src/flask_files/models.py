@@ -7,6 +7,7 @@ class User(UserMixin):
         self.username = username
         self.email = email
         self.password_hash = password_hash
+        self.intolerances = []
 
     def get_id(self):
         return self.username

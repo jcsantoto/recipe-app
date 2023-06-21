@@ -1,9 +1,17 @@
+tree_nuts = ["almonds", "brazil nut", "cashew", "hazelnut", "macadamia nut", "pecan", "pine nut", "pistachio", "walnut"]
+# dairy and gluten covered
+egg = "egg"
+peanut = "peanuts"
+grain = ["flour"]
+
+
 def clean_summary(summary: str) -> str:
     sentence_cutoff = _find_sentence_with_keyword(summary,  "serves")
     summary = _first_n_sentences(summary, sentence_cutoff + 1)
     summary = _remove_html_bold(summary)
 
     return summary
+
 
 def _remove_html_bold(text: str) -> str:
     unbolded_text = text.replace("<b>", "")
@@ -32,6 +40,3 @@ def _find_sentence_with_keyword(text: str, keyword: str) -> int:
 
     return -1
 
-
-if __name__ == '__main__':
-    create_virtual_shopping_list("662264")

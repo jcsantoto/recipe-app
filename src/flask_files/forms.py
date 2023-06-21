@@ -6,7 +6,7 @@ from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
 from flask_login import current_user
 from .extensions import bcrypt
-from src.api_url_builder import SortOptions, DietOptions
+from src.api_options import SortOptions, DietOptions
 
 
 class SearchForm(FlaskForm):
