@@ -15,8 +15,11 @@ def about_page():
 
 @views.route("/results")
 def display_results():
-
     return render_template("display_results.html")
+
+@views.route("/passreset")
+def password_reset():
+    return render_template("password_reset.html")
 
 
 
