@@ -15,6 +15,9 @@ class Recipe:
         url = SEARCH_URL.replace("{id}", self.id) + APIKEY
         self.recipe_info = requests.get(url).json()
 
+    def get_all(self):
+        return self.recipe_info
+
     def get_title(self) -> str:
         """
         Method to get recipe title

@@ -1,12 +1,13 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
 from flask_login import current_user, login_required
-import src.flask_files.forms as forms
-from src.flask_files.database import mongo
-import src.search as recipe_search
-from src.api_url_builder import SortOptions, FilterOptions, SearchMode
-from src.recipe_info import Recipe
 import pdfkit
-from src.recipe_info_formatter import clean_summary
+
+import src.search as recipe_search
+from src.flask_files import forms
+from src.flask_files.database import mongo
+from src.api_options import SortOptions, FilterOptions, SearchMode
+from src.recipe_info import Recipe
+from src.recipe_info_util import clean_summary
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 

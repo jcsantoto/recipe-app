@@ -3,7 +3,7 @@ from flask_login import current_user, login_required, login_user
 from src.flask_files import forms
 from src.flask_files.database import mongo
 from src.flask_files.models import User
-from .extensions import bcrypt
+from src.flask_files.extensions import bcrypt
 
 from enum import Enum
 
@@ -38,16 +38,19 @@ def account_settings():
 
         user_info_id = user_info['_id']
 
+        # Update username
         if form.username.data:
             accounts_db.update_one({"_id": user_info_id},
                                    {"$set": {"username": form.username.data}})
             current_user.username = form.username.data
 
+        # Update email
         if form.email.data:
             accounts_db.update_one({"_id": user_info_id},
                                    {"$set": {"email": form.email.data}})
             current_user.email = form.email.data
 
+        # Update password
         if form.old_password.data and form.new_password.data and form.confirm_password.data:
             hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
             accounts_db.update_one({"_id": user_info_id},
