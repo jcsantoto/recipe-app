@@ -67,8 +67,3 @@ class Recipe:
         """
         return self.recipe_info['analyzedInstructions'][0]['steps']
 
-
-if __name__ == '__main__':
-    recipe = Recipe(str(632167))
-
-    print(recipe.get_all())

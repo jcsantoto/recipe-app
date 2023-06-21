@@ -59,9 +59,6 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
     # Retrieve results
     results = _get_results(recipe_search)
 
-    print(recipe_search.get_url())
-    print(recipe_search.get_querystring())
-
     return results
 
 

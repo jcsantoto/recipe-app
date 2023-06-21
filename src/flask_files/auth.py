@@ -1,7 +1,7 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
-from .extensions import login_manager, bcrypt
 from src.flask_files import forms
+from src.flask_files.extensions import login_manager, bcrypt
 from src.flask_files.models import User
 from src.flask_files.database import mongo
 

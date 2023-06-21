@@ -3,7 +3,7 @@ from flask_login import current_user, login_required, login_user
 from src.flask_files import forms
 from src.flask_files.database import mongo
 from src.flask_files.models import User
-from .extensions import bcrypt
+from src.flask_files.extensions import bcrypt
 
 from enum import Enum
 

@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectMultipleField, SelectField, \
     IntegerField, FieldList, FormField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
-from flask_login import current_user
-from .extensions import bcrypt
+from src.flask_files.extensions import bcrypt
 from src.api_options import SortOptions, DietOptions
 
 
@@ -114,7 +114,8 @@ class SortAndFilterOptionsForm(FlaskForm):
     diet_option = [e.value for e in DietOptions]
 
     sort = SelectField('Sort', validators=[Optional()], choices=sort_options)
-    ingredients = StringField("Ingredients Filter", validators=[Optional()], render_kw={"placeholder": "milk, apple, ..."})
+    ingredients = StringField("Ingredients Filter", validators=[Optional()],
+                              render_kw={"placeholder": "milk, apple, ..."})
     diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option)
 
     min_price = IntegerField("Min Price", validators=[Optional()], render_kw={"placeholder": "Min"})

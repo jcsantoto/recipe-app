@@ -43,11 +43,11 @@ class RecipeSearch:
 
     def add_filter(self, filter_type: str, min_val: int, max_val: int):
         """
-
-        :param filter_type:
-        :param min_val:
-        :param max_val:
-        :return:
+        Specifies the type of filter to apply and the range of values to filter by.
+        :param filter_type: Type of filter
+        :param min_val: Minimum value to filter by
+        :param max_val: Maximum value to filter by
+        :return: self
         """
         if min_val:
             self.querystring["min"+filter_type] = min_val
@@ -87,9 +87,9 @@ class RecipeSearch:
 
     def exclude_ingredients(self, ingredients: str) -> RecipeSearch:
         """
-
-        :param ingredients:
-        :return:
+        Specifies ingredients to exclude from search
+        :param ingredients: Ingredient to exclude
+        :return: self
         """
         self.querystring["excludeIngredients"] = ingredients.replace(" ", "")
 
@@ -120,14 +120,18 @@ class RecipeSearch:
         """
         self.querystring["number"] = num_results
 
-    def get_url(self) -> RecipeSearch:
+    def get_url(self) -> str:
         """
         Retrieves the url
         :return: the url appended with the API key.
         """
         return self.url
 
-    def get_querystring(self):
+    def get_querystring(self) -> dict:
+        """
+        Retrieves parameters of the query as a dict
+        :return: the parameters of the query as a dict.
+        """
         return self.querystring
 
 
