@@ -132,6 +132,16 @@ def display_recipe(recipe_id):
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
     time = recipe_info.get_prep_time()
+    contains_intolerances = None
+
+    if current_user.is_authenticated:
+        username = current_user.username
+
+        user_info = accounts_db.find_one({"username": username})
+
+        user_intolerances = Options.idx_to_option(user_info["intolerances"], Options.IntoleranceOptions)
+
+        contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
     session["title"] = title
     session["summary"] = summary
@@ -140,7 +150,7 @@ def display_recipe(recipe_id):
     session["time"] = time
 
     return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions)
+                           instructions=instructions, contains_intolerances=contains_intolerances)
 
 
 @views.route("/pdf")

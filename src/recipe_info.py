@@ -1,4 +1,6 @@
 import requests
+from src.api_options import IntoleranceOptions
+import src.recipe_info_util as util
 
 APIKEY = "?apiKey=b9f570c04c8a44229ffd38618ddfabe2"
 
@@ -10,9 +12,10 @@ class Recipe:
     This class is used to represent a recipe specified by a recipe id.
     It contains methods to retrieve information about a recipe.
     """
+
     def __init__(self, recipe_id: int):
         self.id = recipe_id
-        url = SEARCH_URL.replace("{id}", self.id) + APIKEY
+        url = SEARCH_URL.replace("{id}", str(self.id)) + APIKEY
         self.recipe_info = requests.get(url).json()
 
     def get_all(self):
@@ -66,4 +69,58 @@ class Recipe:
         :return: Returns instructions as a list.
         """
         return self.recipe_info['analyzedInstructions'][0]['steps']
+
+    def contains_intolerances(self, user_intolerances: list[IntoleranceOptions]) -> list:
+
+        contained_intolerances = []
+        ingredients = self.get_ingredients()
+
+        for intolerance in user_intolerances:
+            # check dairy
+            if intolerance == IntoleranceOptions.Dairy and not self.recipe_info["dairyFree"]:
+                contained_intolerances.append(IntoleranceOptions.Dairy)
+
+            # check gluten
+            elif intolerance == IntoleranceOptions.Gluten and not self.recipe_info["glutenFree"]:
+                contained_intolerances.append(IntoleranceOptions.Gluten)
+
+            # check wheat
+            elif intolerance == IntoleranceOptions.Wheat and not self.recipe_info["glutenFree"]:
+                contained_intolerances.append(IntoleranceOptions.Wheat)
+
+            # check grain
+            elif intolerance == IntoleranceOptions.Grain:
+
+                if not self.recipe_info["glutenFree"] or util.check_for_grain(ingredients):
+                    contained_intolerances.append(IntoleranceOptions.Grain)
+
+            # check egg
+            elif intolerance == IntoleranceOptions.Egg and util.check_for_egg(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Egg)
+
+            # check peanut
+            elif intolerance == IntoleranceOptions.Peanut and util.check_for_peanuts(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Peanut)
+
+            # check seafood
+            elif intolerance == IntoleranceOptions.Seafood and util.check_for_seafood(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Seafood)
+
+            # check sesame
+            elif intolerance == IntoleranceOptions.Sesame and util.check_for_sesame(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Sesame)
+
+            # check soy
+            elif intolerance == IntoleranceOptions.Soy and util.check_for_soy(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Soy)
+
+            # check sulfite
+            elif intolerance == IntoleranceOptions.Sulfite and util.check_for_sulfite(ingredients):
+                contained_intolerances.append(IntoleranceOptions.Sulfite)
+
+            # check tree nut
+            elif intolerance == IntoleranceOptions.TreeNut and util.check_for_tree_nuts(ingredients):
+                contained_intolerances.append(IntoleranceOptions.TreeNut)
+
+        return contained_intolerances
 
