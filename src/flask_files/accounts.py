@@ -65,7 +65,7 @@ def account_settings():
         accounts_db.update_one({"_id": user_info_id},
                                {"$set": {"intolerances": form.intolerances.data}})
 
-        updated_user = User(current_user.username, current_user.email, current_user.password_hash)
+        updated_user = User(current_user.username, current_user.email, current_user.password_hash, current_user.intolerances)
         login_user(updated_user)
 
         flash("Changes saved")
