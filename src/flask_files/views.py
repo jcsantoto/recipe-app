@@ -5,11 +5,15 @@ import pdfkit
 import src.search as recipe_search
 from src.flask_files import forms
 from src.flask_files.database import mongo
-from src.api_options import SortOptions, FilterOptions, SearchMode
+from src import api_options as Options
 from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
+
+client = mongo.cx
+db = client["recipeapp"]
+accounts_db = db["accounts"]
 
 
 @views.route("/", methods=['GET'])
@@ -27,10 +31,11 @@ def search():
     query = request.args.get('query')
 
     form = forms.SortAndFilterOptionsForm()
+    notices = None
 
+    # Set labels on the nutrition filter
     nutrition_labels = ["Calories", "Carbs", "Fat"]
     num_labels = len(nutrition_labels)
-
     for i in range(num_labels):
         form.nutrition[i].label.text = nutrition_labels[i]
 
@@ -41,9 +46,12 @@ def search():
         # diet filter
         diets = form.diet.data
 
+        # intolerance filter
+        intolerances = form.intolerances.data
+
         # sort
-        if form.sort.data != SortOptions.default:
-            sort = SortOptions(form.sort.data)
+        if form.sort.data != Options.SortOptions.default:
+            sort = Options.SortOptions(form.sort.data)
         else:
             sort = None
 
@@ -54,7 +62,7 @@ def search():
         min_price = form.min_price.data
         max_price = form.max_price.data
         if min_price or max_price:
-            filters.append(FilterOptions.Price)
+            filters.append(Options.FilterOptions.Price)
             filter_settings.append({"min": min_price,
                                     "max": max_price})
 
@@ -65,19 +73,54 @@ def search():
             max_val = field.max_value.data
 
             if min_val or max_val:
-                filters.append(FilterOptions(name))
+                filters.append(Options.FilterOptions(name))
                 filter_settings.append({"min": min_val,
                                         "max": max_val})
 
-        results = recipe_search.search(query=query, mode=SearchMode.ByName, sort=sort, filters=filters,
-                                       filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients)
+        # If user is logged in, check intolerances
+        if current_user.is_authenticated:
+            username = current_user.username
 
-        return render_template('display_results.html', query=query, results=results, form=form)
+            user_info = accounts_db.find_one({"username": username})
+
+            intolerance_list = Options.to_list(Options.IntoleranceOptions)
+            user_intolerances_idx = user_info["intolerances"]
+            user_intolerances = [intolerance_list[x].value for x in user_intolerances_idx]
+
+            selected_intolerances = form.intolerances.data
+
+            diff = list(set(user_intolerances).difference(selected_intolerances))
+
+            notices = ["Warning: Your user preferences indicate you are intolerant to " + x +
+                       ". The recipes shown may contain this ingredient. Select " + x +
+                       " under the Intolerances section to filter out recipes containing that ingredient"
+                       for x in diff]
+
+        results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, sort=sort, filters=filters,
+                                       filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients,
+                                       intolerances=intolerances)
+
+        return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
 
     else:
-        results = recipe_search.search(query, mode=SearchMode.ByName)
 
-    return render_template('display_results.html', query=query, results=results, form=form)
+        # If user is logged in, preselect intolerances
+        if current_user.is_authenticated:
+            username = current_user.username
+
+            user_info = accounts_db.find_one({"username": username})
+
+            intolerance_list = Options.to_list(Options.IntoleranceOptions)
+            user_intolerances = user_info["intolerances"]
+
+            form.intolerances.data = [intolerance_list[x].value for x in user_intolerances]
+
+            results = recipe_search.search(query, mode=Options.SearchMode.ByName, intolerances=form.intolerances.data)
+
+        else:
+            results = recipe_search.search(query, mode=Options.SearchMode.ByName)
+
+    return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
 
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])

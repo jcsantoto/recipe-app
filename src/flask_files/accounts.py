@@ -4,6 +4,7 @@ from src.flask_files import forms
 from src.flask_files.database import mongo
 from src.flask_files.models import User
 from src.flask_files.extensions import bcrypt
+from src.api_options import IntoleranceOptions
 
 from enum import Enum
 
@@ -19,8 +20,12 @@ accounts_db = db["accounts"]
 def account_page():
     username = current_user.username
     email = current_user.email
+    intolerance_list = [x for x in IntoleranceOptions]
 
-    return render_template("account.html", username=username, email=email)
+    intolerance_idx = current_user.intolerances
+    intolerances = ",".join([intolerance_list[x].name for x in intolerance_idx])
+
+    return render_template("account.html", username=username, email=email, intolerances=intolerances)
 
 
 @accounts.route("/account/settings", methods=['GET', 'POST'])
@@ -56,6 +61,7 @@ def account_settings():
             accounts_db.update_one({"_id": user_info_id},
                                    {"$set": {"password": hashed_password}})
 
+        # Set Intolerances
         accounts_db.update_one({"_id": user_info_id},
                                {"$set": {"intolerances": form.intolerances.data}})
 

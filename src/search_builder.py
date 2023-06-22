@@ -1,5 +1,5 @@
 from __future__ import annotations
-from src.api_options import FilterOptions, DietOptions
+from src.api_options import FilterOptions, DietOptions, IntoleranceOptions
 
 APIKEY = "b9f570c04c8a44229ffd38618ddfabe2"
 
@@ -83,6 +83,12 @@ class RecipeSearch:
         diet_str = "|".join([x.value for x in diets])
 
         self.querystring["diet"] = diet_str
+        return self
+
+    def add_intolerances(self, intolerances: list[IntoleranceOptions]) -> RecipeSearch:
+
+        intolerance_str = ",".join([x.value for x in intolerances])
+        self.querystring["intolerances"] = intolerance_str
         return self
 
     def exclude_ingredients(self, ingredients: str) -> RecipeSearch:

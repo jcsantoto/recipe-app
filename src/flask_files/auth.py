@@ -32,7 +32,7 @@ def login():
 
         # checks if user is not null. checks if password matches
         if user and bcrypt.check_password_hash(user["password"], form.password.data):
-            user_object = User(user["username"], user["email"], user["password"])
+            user_object = User(user["username"], user["email"], user["password"], user["intolerances"])
 
             # logs user in
             login_user(user_object, remember=form.remember.data)
@@ -84,6 +84,6 @@ def load_user(user_id):
     user = accounts.find_one({"username": user_id})
 
     if user:
-        return User(user["username"], user["email"], user["password"])
+        return User(user["username"], user["email"], user["password"], user["intolerances"])
 
     return None
