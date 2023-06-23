@@ -4,104 +4,131 @@
 <script src = "../styles/frontend_code.js"></script>
 <div style = "margin-left: 1%;">
 <h1> Results </h1>
+
+            {% if notices %}
+            <div style = "background-color: yellow;">
+                {% for notice in notices %}
+                    <span>
+                        {{ notice }} <br>
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%;">
-    <div class = "col">
-        <div class = "row">
-            <h2>Sort Options</h2>
-        </div>
 
-        <div class = "row">
-            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                <label class="btn btn-outline-success" for="btnradio1">Search for recipes by name</label>
+    <div class = "col-md-2">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
 
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                <label class="btn btn-outline-success" for="btnradio2">Search for recipes by ingredient</label>
-            </div>
-        </div>
-
-        <div class = "row" style = "margin-top: 1%;">
-            <div class="custom-checkbox">
-                <input id="status" type="checkbox" name="status">
-                <label for="status">
-                    <div class="status-switch"  data-unchecked="Search for recipes by name" data-checked="Search for recipes by ingredient">
-                    </div>
-                </label>
-            </div>
-
-        </div>
-
-        <!--First section for price sort-->
-        <div class = "row">
             <div class = "row">
-                <h3>Price</h3>
+                <h3> {{ form.sort.label(class="form-control-label") }} </h3>
             </div>
-            <div class = "row">
-                <div class = "col">
-                    <input type = "text" class = "form-control" value = "Minimum Price"/>
-                </div>
-                <div class = "col">
-                    <input type = "text" class = "form-control" value = "Maximum Price"/>
-                </div>
-            </div>
-        </div>
 
-        <!--Second section for ingredient filter-->
-        <div class = "row" style = "margin-top: 3%;">
-            <div class = "row">
-                <h3>Ingredients</h3>
-            </div>
-            <div class = "row">
-                <input type = "text" class = "form-control" value = "Please type in some tags"/>
-            </div>
-        </div>
 
-        <!--Third section for nutritional filter-->
-        <div class = "row" style = "margin-top: 3%;">
+            <!-- 0th section for sort dropdown-->
             <div class = "row">
-                <h3>Nutritional Filter</h3>
+                {{ form.sort(class="form-control form-control-lg") }}
             </div>
+
+            <!--First section for price filter-->
             <div class = "row">
                 <div class = "row">
-                    <div class = "col"><h4>Calories</h4></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum calories"/></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum calories"/></div>
+                    <h3> Price </h3>
                 </div>
+                    <div class = "col">
+                        <h3> {{ form.min_price(class="form-control form-control-lg") }} </h3>
+                    </div>
+                    <div class = "col">
+                        <h3> {{ form.max_price(class="form-control form-control-lg") }} </h3>
+                    </div>
+            </div>
 
-                <div class = "row" style = "margin-top: 1%;">
-                    <div class = "col"><h4>Carbs</h4></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum carbs"/></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum carbs"/></div>
+
+            <!--Second section for ingredient filter-->
+            <div class = "row" style = "margin-top: 3%;">
+                <div class = "row">
+                    <h3>Exclude Ingredients</h3>
                 </div>
+                <div class = "row">
+                    {{ form.ingredients(class="form-control form-control-lg") }}
+                </div>
+            </div>
 
-                <div class = "row" style = "margin-top: 1%;">
-                    <div class = "col"><h4>Fat</h4></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Minimum fat"/></div>
-                    <div class = "col"><input type = "text" class = "form-control" value = "Maximum fat"/></div>
+            <!-- Diet filter  -->
+            <div class = "row" style = "margin-top: 3%;">
+                <div class = "row">
+                    <h3>Diet</h3>
+                </div>
+                <div class = "row">
+                    {{ form.diet(class="form-control form-control-lg") }}
+                </div>
+            </div>
+
+
+            <!-- Intolerance filter  -->
+            <div class = "row" style = "margin-top: 3%;">
+                <div class = "row">
+                    <h3>Intolerance</h3>
+                </div>
+                <div class = "row">
+                    {{ form.intolerances(class="form-control form-control-lg") }}
+                </div>
+            </div>
+
+
+            <!--Third section for nutritional filter-->
+            <div class = "row" style = "margin-top: 3%;">
+                <div class = "row">
+                    <h3>Nutritional Filter</h3>
+                </div>
+                <div class = "row">
+
+                    {% for nested in form.nutrition %}
+                        {{ nested.csrf_token }}
+                        <h4> {{ nested.label }} </h4>
+                        <div class = "col">
+                            {{ nested.min_value(class="form-control form-control-lg") }}
+                        </div>
+                        <div class = "col">
+                            {{ nested.max_value(class="form-control form-control-lg") }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
             </div>
-
-        </div>
-
-
+            {{ form.apply(class="btn btn-outline-info") }}
+        </form>
     </div>
 
-    <div class = "col">
-        <div class = "row">
-            <h2>Result Display</h2>
-        </div>
-        <div class = "row">
+    <!--Recipes-->
+    <div class = "col-md-8">
+
+
+        <div class = "row" style = "margin-bottom: 2%;">
+            <h2> Result Display </h2>
+            {% for recipe in results %}
+
             <div class = "col-md-4">
-                <img src = "{{url_for('static', filename='/images/sonic_curry.jpg')}}" style = "max-width: 250px; max-height: 250px;">
+                <img src = "{{ recipe['image'] }}" style = "max-width: 500px; max-height: 500px;">
             </div>
-            <div class = "col">
-                <div class = "row"><h3>Title of food goes here</h3></div>
-                <div class = "row"><h4>Description of food would go here</h4></div>
+
+            <div class = "col-md-8">
+                <div class = "row">
+                    <a href = "/recipe/{{ recipe['id'] }}" > <h3> {{ recipe['title']|safe }} </h3> </a>
+                </div>
+
+                <div class = "row"><h4> {{ recipe['summary']|safe }} </h4></div>
             </div>
+
+
+            {% endfor %}
         </div>
+
     </div>
 
 </div>
