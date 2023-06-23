@@ -1,6 +1,7 @@
 {% extends "template.html" %}
 
 {% block content %}
+<script src = "../styles/frontend_code.js"></script>
 <div style = "margin-left: 1%;">
 <h1> Results </h1>
 
@@ -21,6 +22,7 @@
     <div class = "col-md-2">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
+
             <div class = "row">
                 <h3> {{ form.sort.label(class="form-control-label") }} </h3>
             </div>

@@ -25,6 +25,9 @@ def home_page():
 def about_page():
     return render_template("about.html")
 
+@views.route("/passreset")
+def password_reset():
+    return render_template("password_reset.html")
 
 @views.route("/search", methods=['GET', 'POST'])
 def search():
