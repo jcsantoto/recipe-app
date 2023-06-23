@@ -1,5 +1,5 @@
 import requests
-from src.api_options import SortOptions, SearchMode, DietOptions, FilterOptions
+from src.api_options import SortOptions, SearchMode, DietOptions, FilterOptions, IntoleranceOptions
 from src.search_builder import RecipeSearch
 
 
@@ -7,6 +7,7 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
            filters: list[FilterOptions] = None,
            filter_settings: list[dict] = None,
            diets: list[DietOptions] = None,
+           intolerances: list[IntoleranceOptions] = None,
            ex_ingredients: str = None,
            num_results: int = 10) -> list:
     """
@@ -42,6 +43,10 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
     # Diet Filter
     if diets:
         recipe_search.add_diets([DietOptions(x) for x in diets])
+
+    # Intolerances
+    if intolerances:
+        recipe_search.add_intolerances([IntoleranceOptions(x) for x in intolerances])
 
     # Ingredient Filter
     if ex_ingredients:

@@ -16,11 +16,22 @@
 <h3> {{ title }} </h3>
 
 
+
 <h2> Summary </h2>
 
 <p> {{ summary|safe }} </p>
 
 <h2> Ingredients </h2>
+
+{% if contains_intolerances %}
+    <div style = "background-color: yellow;">
+        {% for intolerance in contains_intolerances %}
+        <span>
+            Warning: The following recipe may contain {{ intolerance.name }} which you have specified as an allergen <br>
+        </span>
+        {% endfor %}
+    </div>
+{% endif %}
 
     {% for ingr in ingredients %}
         <p>

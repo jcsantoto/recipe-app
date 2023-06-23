@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
 from src.flask_files.extensions import bcrypt
-from src.api_options import SortOptions, DietOptions
+from src.api_options import SortOptions, DietOptions, IntoleranceOptions
 
 
 class SearchForm(FlaskForm):
@@ -42,9 +42,9 @@ class AccountSettingsForm(FlaskForm):
     Class to help validate and retrieve data from fields in the Account Settings Form
     """
 
-    intolerance_choices = [(1, "Dairy"), (2, "Egg"), (3, "Gluten"), (4, "Grain"), (5, "Peanut"),
-                           (6, "Seafood"), (7, "Sesame"), (8, "Shellfish"), (9, "Soy"),
-                           (10, "Sulfite"), (11, "Tree"), (12, "Nut"), (13, "Wheat")]
+    intolerance_choices = [(0, "Dairy"), (1, "Egg"), (2, "Gluten"), (3, "Grain"), (4, "Peanut"),
+                           (5, "Seafood"), (6, "Sesame"), (7, "Shellfish"), (8, "Soy"),
+                           (9, "Sulfite"), (10, "Tree Nut"), (11, "Wheat")]
 
     username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
     email = StringField('Email', validators=[Email(), Optional()])
@@ -112,11 +112,13 @@ class SortAndFilterOptionsForm(FlaskForm):
 
     sort_options = [e.value for e in SortOptions]
     diet_option = [e.value for e in DietOptions]
+    intolerance_option = [e.value for e in IntoleranceOptions]
 
     sort = SelectField('Sort', validators=[Optional()], choices=sort_options)
     ingredients = StringField("Ingredients Filter", validators=[Optional()],
                               render_kw={"placeholder": "milk, apple, ..."})
     diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option)
+    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option)
 
     min_price = IntegerField("Min Price", validators=[Optional()], render_kw={"placeholder": "Min"})
     max_price = IntegerField("Max Price", validators=[Optional()], render_kw={"placeholder": "Max"})

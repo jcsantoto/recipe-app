@@ -1,21 +1,22 @@
 from enum import Enum
 
 
-class IntoleranceOptions(Enum):
-    Dairy = 1
-    Egg = 2
-    Gluten = 3
-    Grain = 4
-    Peanut = 5
-    Seafood = 6
-    Sesame = 7
-    Shellfish = 8
-    Soy = 9
-    Sulfite = 10
-    Tree = 11
-    Nut = 12
-    Wheat = 13
+def to_list(option_enum: Enum) -> list:
+    return [x for x in option_enum]
 
+class IntoleranceOptions(Enum):
+    Dairy = "dairy"
+    Egg = "egg"
+    Gluten = "gluten"
+    Grain = "grain"
+    Peanut = "peanut"
+    Seafood = "seafood"
+    Sesame = "sesame"
+    Shellfish = "shellfish"
+    Soy = "soy"
+    Sulfite = "sulfite"
+    TreeNut = "tree-nut"
+    Wheat = "wheat"
 
 class FilterOptions(Enum):
     Calories = "Calories"
