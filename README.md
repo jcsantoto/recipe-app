@@ -14,37 +14,37 @@ From there, there is a navigation bar that will allow you to visit various other
  * About Us: Displays information about the website as well as the development team.
  * Register: Allows the user to register for an account to access various features.
  * Login: Allows the user to login to their account and access various features.
+ * Search: A search bar that allows a user to enter a query to search for a recipe.
+
+<b> After searching: </b>
+Results: Displays results of the search. Shows various sorting and filtering options on the side.
+Recipe: Displays information about the recipe such as 
  
  <b> When logged in: </b>
  * Account: Displays information about the user such as their username and email.
+ * Account Settings: Allows user to change their username, email, and other preferences.
  * Logout: Logs the user out of their account.
 
 # Developer Documentation
 
 ### src
+- `api_options.py`: Contains enum classes to help maintain consistency when specifying an option for a parameter in an API call.
 - `main.py`: Creates and runs the flask web application.
-- `recipe_info.py`: Obtains information of a recipe using an ID and stores in a Recipe object. Contains several methods to retrieve different aspects of the recipe.
-- `search.py`: Contains functions related to retrieving recipes by name and by ingredients as well as various sorting and filtering functions.
-- `virtual_shopping_list.py`: Contains code to create a virtual shopping list of a recipe and serving it as a pdf.
+- `recipe_info.py`: Obtains information of a recipe using an ID and stores in a Recipe object. Contains several methods to retrieve different aspects of a recipe.
+- `recipe_info_util.py`: Contains various helper functions to aid in working with recipe info. This includes functions to check for certain allergens in an ingredients list and a function to clean up the summary of a recipe.
+- `search.py`: Contains a function for searching that takes in various parameters to customize the search. Also contains various helper functions to aid in retrieval and filtering of data.
+- `search_builder.py`: Helps build the API call for searching for recipes.
+
 
 ### src/flask_files
 - `app.py`: Contains a single function which intializes the flask app, the database, and any flask extensions.
+- `accounts.py`: Contains code for flask routes related to the user's account such as the Account and Account Settings page.
 - `auth.py`: Contains code for flask routes related to authentication such as Login, Registration, and Logout.
 - `database.py`: Contains a single function to initialize the database.
 - `extension.py`: Contains flask extensions and their instances.
 - `forms.py`: Contains classes for each type of form needed for the website such as the Login form and Registration form.
 - `models.py`: Contains a class that models a User by their username, email, and password.
 - `views.py`: Contains code for flask routes that are not related authentication.
-
-### templates
-- `about.html`: Contains template for the About Us page.
-- `account.html`: Contains a template for the Account page.
-- `display_results.html`: Contains a template for the results page after searching for a recipe.
-- `index.html`: Contains a template for the home page.
-- `login.html`: Contains a template for the login page.
-- `register.html`: Contains a template for the register page.
-- `shopping_list.html`: Contains a template for the virtual shopping list.
-- `template.html`: Contains code for the navigation bar.
 
 ## Credits
 
