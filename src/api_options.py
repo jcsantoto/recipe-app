@@ -4,6 +4,12 @@ from enum import Enum
 def to_list(option_enum: Enum) -> list:
     return [x for x in option_enum]
 
+
+def idx_to_option(idx: list, option_enum: Enum) -> list:
+    options = to_list(option_enum)
+    return [options[x] for x in idx]
+
+
 class IntoleranceOptions(Enum):
     Dairy = "dairy"
     Egg = "egg"
