@@ -4,6 +4,7 @@ from enum import Enum
 def to_list(option_enum: Enum) -> list:
     return [x for x in option_enum]
 
+
 class IntoleranceOptions(Enum):
     Dairy = "dairy"
     Egg = "egg"
@@ -18,11 +19,17 @@ class IntoleranceOptions(Enum):
     TreeNut = "tree-nut"
     Wheat = "wheat"
 
-class FilterOptions(Enum):
+
+class ApiFilterOptions(Enum):
     Calories = "Calories"
     Carbs = "Carbs"
     Fat = "Fat"
-    Price = "price"
+
+
+class CustomFilterOptions(Enum):
+    Price = "Price"
+    Servings = "Servings"
+    Ingredients = "Ingredients"
 
 
 class SortOptions(Enum):

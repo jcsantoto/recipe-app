@@ -42,8 +42,15 @@ def search():
     for i in range(num_labels):
         form.nutrition[i].label.text = nutrition_labels[i]
 
+    # Set labels on custom filters
+    custom_labels = ["Price", "Servings", "Ingredients"]
+    num_custom_labels = len(custom_labels)
+    for i in range(num_custom_labels):
+        form.custom_filters[i].label.text = custom_labels[i]
+
     if form.validate_on_submit():
         filters = []
+        custom_filters = {}
         filter_settings = []
 
         # diet filter
@@ -61,13 +68,14 @@ def search():
         # ingredient filter
         ingredients = form.ingredients.data
 
-        # price filter
-        min_price = form.min_price.data
-        max_price = form.max_price.data
-        if min_price or max_price:
-            filters.append(Options.FilterOptions.Price)
-            filter_settings.append({"min": min_price,
-                                    "max": max_price})
+        # custom filter
+        for field in form.custom_filters:
+            name = field.label.text
+            min_val = field.min_value.data
+            max_val = field.max_value.data
+
+            if min_val or max_val:
+                custom_filters[Options.CustomFilterOptions(name)] = {"min": min_val, "max": max_val}
 
         # nutrition filter
         for field in form.nutrition:
@@ -76,7 +84,7 @@ def search():
             max_val = field.max_value.data
 
             if min_val or max_val:
-                filters.append(Options.FilterOptions(name))
+                filters.append(Options.ApiFilterOptions(name))
                 filter_settings.append({"min": min_val,
                                         "max": max_val})
 
@@ -101,7 +109,7 @@ def search():
 
         results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, sort=sort, filters=filters,
                                        filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients,
-                                       intolerances=intolerances)
+                                       intolerances=intolerances, custom_filter=custom_filters)
 
         return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
 

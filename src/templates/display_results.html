@@ -34,16 +34,22 @@
             </div>
 
             <!--First section for price filter-->
-            <div class = "row">
+            <div class = "row" style = "margin-top: 3%;">
                 <div class = "row">
-                    <h3> Price </h3>
+
+                    {% for nested in form.custom_filters %}
+                        {{ nested.csrf_token }}
+                        <h3> {{ nested.label }} </h3>
+                        <div class = "col">
+                            {{ nested.min_value(class="form-control form-control-lg") }}
+                        </div>
+                        <div class = "col">
+                            {{ nested.max_value(class="form-control form-control-lg") }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
-                    <div class = "col">
-                        <h3> {{ form.min_price(class="form-control form-control-lg") }} </h3>
-                    </div>
-                    <div class = "col">
-                        <h3> {{ form.max_price(class="form-control form-control-lg") }} </h3>
-                    </div>
             </div>
 
 
@@ -101,6 +107,7 @@
                 </div>
 
             </div>
+
             {{ form.apply(class="btn btn-outline-info") }}
         </form>
     </div>
