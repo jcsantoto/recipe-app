@@ -14,6 +14,7 @@ views = Blueprint('views', __name__, template_folder="../templates", static_fold
 client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
+favorites_db = db["favorites"]
 
 
 @views.route("/", methods=['GET'])
@@ -25,9 +26,11 @@ def home_page():
 def about_page():
     return render_template("about.html")
 
+
 @views.route("/passreset")
 def password_reset():
     return render_template("password_reset.html")
+
 
 @views.route("/search", methods=['GET', 'POST'])
 def search():
@@ -137,42 +140,58 @@ def search():
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
     recipe_info = Recipe(recipe_id)
-
     title = recipe_info.get_title()
     summary = clean_summary(recipe_info.get_summary())
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
     time = recipe_info.get_prep_time()
     contains_intolerances = None
+    favorite = False
 
     if current_user.is_authenticated:
         username = current_user.username
 
-        user_info = accounts_db.find_one({"username": username})
+        user_favorites_info = favorites_db.find_one({"username": username})
+        user_account_info = accounts_db.find_one({"username": username})
 
-        user_intolerances = Options.idx_to_option(user_info["intolerances"], Options.IntoleranceOptions)
+        user_favorites = user_favorites_info["favorites"]
+        user_intolerances = Options.idx_to_option(user_account_info["intolerances"], Options.IntoleranceOptions)
 
         contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
+        if recipe_id in user_favorites:
+            favorite = True
+
+        if request.method == 'POST':
+
+            # Favorite recipe
+            if recipe_id in user_favorites:
+                del user_favorites[recipe_id]
+            else:
+                user_favorites[recipe_id] = title
+
+            favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+
+            return 'Action Completed'
+
     session["title"] = title
-    session["summary"] = summary
     session["ingredients"] = ingredients
     session["instructions"] = instructions
     session["time"] = time
 
     return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions, contains_intolerances=contains_intolerances)
+                           instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
+                           current_user=current_user, recipe_id=recipe_id)
 
 
 @views.route("/pdf")
 def shopping_list():
     title = session["title"]
-    summary = session["summary"]
     ingredients = session["ingredients"]
     instructions = session["instructions"]
     time = session["time"]
 
-    rendered = render_template("shopping_list.html", title=title, summary=summary, time=time, ingredients=ingredients,
+    rendered = render_template("shopping_list.html", title=title, time=time, ingredients=ingredients,
                                instructions=instructions)
 
     pdf = pdfkit.from_string(rendered, False)
