@@ -1,0 +1,9 @@
+flask==1.1.2
+flask-wtf==1.01
+flask-login==0.6.1
+flask-pymongo==2.02
+flask-bcrypt==1.01
+flask-caching==2.02
+requests==2.26.0
+pdfkit==1.0.0
+wtforms==3.0.1
