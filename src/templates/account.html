@@ -16,7 +16,7 @@
                     <h2>Username: </h2>
                 </div>
                 <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ username }} readonly/>
+                    <input type = "text" class = "form-control" value = "{{ username }}" readonly/>
                 </div>
             </div>
 
@@ -25,7 +25,7 @@
                     <h2>Email: </h2>
                 </div>
                 <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ email }} readonly/>
+                    <input type = "text" class = "form-control" value = "{{ email }}" readonly/>
                 </div>
             </div>
 
@@ -34,8 +34,12 @@
                     <h2>Allergies: </h2>
                 </div>
                 <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ intolerances }} readonly/>
+                    <input type = "text" class = "form-control" value = "{{ intolerances }}" readonly/>
                 </div>
+            </div>
+
+            <div class = "row">
+                <a class = "button" href = "/account/settings">Account Settings</a>
             </div>
 
             <div class = "row" style="margin-top: 3%;">
@@ -44,9 +48,9 @@
 
             <div class = "row" style = "margin-left: 1%;">
                 <ul>
-                    <li>Favorite Recipe 1</li>
-                    <li>Favorite Recipe 2</li>
-                    <li>Favorite Recipe 3</li>
+                    {% for id in favorites %}
+                        <a href = "recipe/{{ id }}"> {{ favorites[id] }} </a>
+                    {% endfor %}
                 </ul>
             </div>
 

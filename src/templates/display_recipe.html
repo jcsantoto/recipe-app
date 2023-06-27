@@ -7,9 +7,26 @@
     <div class="col-md-1">
         <h2> Recipe Info </h2>
     </div>
+
     <div class="col-md-10">
         <a href="/pdf"> Print PDF </a>
     </div>
+
+    <div class="col-md-10">
+        {% if current_user.is_authenticated %}
+
+                <button class="favorite-btn" data-recipe-id="{{ recipe_id }}">
+                    {% if favorite %}
+                        Unfavorite
+                    {% else %}
+                        Favorite
+                    {% endif %}
+                </button>
+
+
+        {% endif %}
+    </div>
+
 
 </div>
 
@@ -56,6 +73,7 @@
     {% endfor %}
 
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{url_for('static', filename='/js/favorite.js')}}"></script>
 
 {% endblock %}

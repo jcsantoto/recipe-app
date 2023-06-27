@@ -13,6 +13,7 @@ accounts = Blueprint('accounts', __name__, template_folder="../templates", stati
 client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
+favorites_db = db["favorites"]
 
 
 @accounts.route("/account")
@@ -25,7 +26,10 @@ def account_page():
     intolerance_idx = current_user.intolerances
     intolerances = ",".join([intolerance_list[x].name for x in intolerance_idx])
 
-    return render_template("account.html", username=username, email=email, intolerances=intolerances)
+    favorites = favorites_db.find_one({"username": username})["favorites"]
+
+    return render_template("account.html", username=username, email=email, intolerances=intolerances,
+                           favorites=favorites)
 
 
 @accounts.route("/account/settings", methods=['GET', 'POST'])
@@ -77,19 +81,3 @@ def account_settings():
 
     form.process()
     return render_template("account_settings.html", form=form)
-
-
-class Intolerances(Enum):
-    Dairy = 1
-    Egg = 3
-    Gluten = 4
-    Grain = 5
-    Peanut = 6
-    Seafood = 7
-    Sesame = 8
-    Shellfish = 9
-    Soy = 10
-    Sulfite = 11
-    Tree = 12
-    Nut = 13
-    Wheat = 14
