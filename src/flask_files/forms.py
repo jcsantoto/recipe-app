@@ -120,8 +120,7 @@ class SortAndFilterOptionsForm(FlaskForm):
     diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option)
     intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option)
 
-    min_price = IntegerField("Min Price", validators=[Optional()], render_kw={"placeholder": "Min"})
-    max_price = IntegerField("Max Price", validators=[Optional()], render_kw={"placeholder": "Max"})
+    custom_filters = FieldList(FormField(Range), min_entries=3, max_entries=3)
 
     nutrition = FieldList(FormField(Range), min_entries=3, max_entries=3)
 
