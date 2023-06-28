@@ -36,6 +36,11 @@ def account_page():
 @accounts.route("/account/settings", methods=['GET', 'POST'])
 @login_required
 def account_settings():
+
+    if not current_user.confirmed:
+        flash("Please confirm your email before setting user preferences")
+        return redirect("/account")
+
     form = forms.AccountSettingsForm()
 
     username = current_user.username

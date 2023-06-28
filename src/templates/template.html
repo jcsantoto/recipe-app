@@ -70,7 +70,25 @@
 
     {% if current_user.is_authenticated %}
         <p> Welcome {{ current_user.username }}</p>
+        {% if not current_user.confirmed %}
+            <p>
+                Your email has not been verified yet. If you would like to resend the confirmation link click
+                <a href="/resend-confirmation">
+                    here
+                </a>
+            </p>
+        {% endif %}
     {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
     <br>
     <br>

@@ -13,7 +13,7 @@
     </div>
 
     <div class="col-md-10">
-        {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated and current_user.confirmed %}
 
                 <button class="favorite-btn" data-recipe-id="{{ recipe_id }}">
                     {% if favorite %}
