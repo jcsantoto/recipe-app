@@ -14,6 +14,7 @@ views = Blueprint('views', __name__, template_folder="../templates", static_fold
 client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
+preferences_db = db["preferences"]
 favorites_db = db["favorites"]
 
 
@@ -40,7 +41,7 @@ def search():
     notices = None
 
     # Set labels on the nutrition filter
-    nutrition_labels = ["Calories", "Carbs", "Fat"]
+    nutrition_labels = ["Calories", "Carbs", "Protein", "Fat"]
     num_labels = len(nutrition_labels)
     for i in range(num_labels):
         form.nutrition[i].label.text = nutrition_labels[i]
@@ -81,24 +82,16 @@ def search():
                 custom_filters[Options.CustomFilterOptions(name)] = {"min": min_val, "max": max_val}
 
         # nutrition filter
-        for field in form.nutrition:
-            name = field.label.text
-            min_val = field.min_value.data
-            max_val = field.max_value.data
-
-            if min_val or max_val:
-                filters.append(Options.ApiFilterOptions(name))
-                filter_settings.append({"min": min_val,
-                                        "max": max_val})
+        _parse_nutrition_filter(filter_settings, filters, form.nutrition)
 
         # If user is logged in, check intolerances
         if current_user.is_authenticated:
             username = current_user.username
 
-            user_info = accounts_db.find_one({"username": username})
+            user_preferences = preferences_db.find_one({"username": username})
 
             intolerance_list = Options.to_list(Options.IntoleranceOptions)
-            user_intolerances_idx = user_info["intolerances"]
+            user_intolerances_idx = user_preferences["intolerances"]
             user_intolerances = [intolerance_list[x].value for x in user_intolerances_idx]
 
             selected_intolerances = form.intolerances.data
@@ -118,23 +111,47 @@ def search():
 
     else:
 
-        # If user is logged in, preselect intolerances
+        # If user is logged in, preselect preferences
         if current_user.is_authenticated:
             username = current_user.username
 
-            user_info = accounts_db.find_one({"username": username})
+            user_preferences = preferences_db.find_one({"username": username})
 
             intolerance_list = Options.to_list(Options.IntoleranceOptions)
-            user_intolerances = user_info["intolerances"]
-
+            user_intolerances = user_preferences["intolerances"]
             form.intolerances.data = [intolerance_list[x].value for x in user_intolerances]
 
-            results = recipe_search.search(query, mode=Options.SearchMode.ByName, intolerances=form.intolerances.data)
+            user_macros = user_preferences["macros"]
+            carbs = user_macros["carbohydrates"]
+            protein = user_macros["protein"]
+            fats = user_macros["fats"]
+
+            if carbs:
+                form.nutrition[1].min_value.data = carbs - 5
+                form.nutrition[1].max_value.data = carbs + 5
+
+            if protein:
+                form.nutrition[2].min_value.data = protein - 5
+                form.nutrition[2].max_value.data = protein + 5
+
+            if fats:
+                form.nutrition[3].min_value.data = fats - 5
+                form.nutrition[3].max_value.data = fats + 5
+
+            filters = []
+            filter_settings = []
+            _parse_nutrition_filter(filter_settings, filters, form.nutrition)
+
+            results = recipe_search.search(query, mode=Options.SearchMode.ByName, intolerances=form.intolerances.data,
+                                           filters=filters, filter_settings=filter_settings)
 
         else:
             results = recipe_search.search(query, mode=Options.SearchMode.ByName)
 
     return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
+
+
+
 
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
@@ -152,10 +169,10 @@ def display_recipe(recipe_id):
         username = current_user.username
 
         user_favorites_info = favorites_db.find_one({"username": username})
-        user_account_info = accounts_db.find_one({"username": username})
+        user_preferences_info = accounts_db.find_one({"username": username})
 
         user_favorites = user_favorites_info["favorites"]
-        user_intolerances = Options.idx_to_option(user_account_info["intolerances"], Options.IntoleranceOptions)
+        user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
         contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
@@ -200,3 +217,15 @@ def shopping_list():
     response.headers['Content-Disposition'] = 'inline; filename=shoppinglist.pdf'
 
     return response
+
+
+def _parse_nutrition_filter(filter_settings, filters, nutrition_form):
+    for field in nutrition_form:
+        name = field.label.text
+        min_val = field.min_value.data
+        max_val = field.max_value.data
+
+        if min_val or max_val:
+            filters.append(Options.ApiFilterOptions(name))
+            filter_settings.append({"min": min_val,
+                                    "max": max_val})

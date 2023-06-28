@@ -46,11 +46,16 @@ class AccountSettingsForm(FlaskForm):
                            (5, "Seafood"), (6, "Sesame"), (7, "Shellfish"), (8, "Soy"),
                            (9, "Sulfite"), (10, "Tree Nut"), (11, "Wheat")]
 
-    username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
-    email = StringField('Email', validators=[Email(), Optional()])
     intolerances = SelectMultipleField('Intolerances', validators=[Optional()], choices=intolerance_choices,
                                        widget=ListWidget(prefix_label=False), option_widget=CheckboxInput(),
                                        coerce=int)
+
+    protein = IntegerField('Protein', validators=[Optional()], render_kw={"placeholder": "-"})
+    carbohydrates = IntegerField('Carbohydrates', validators=[Optional()], render_kw={"placeholder": "-"})
+    fats = IntegerField('Fats', validators=[Optional()], render_kw={"placeholder": "-"})
+
+    username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
+    email = StringField('Email', validators=[Email(), Optional()])
     old_password = PasswordField('Old Password', validators=[])
     new_password = PasswordField('New Password', validators=[])
     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
@@ -122,6 +127,6 @@ class SortAndFilterOptionsForm(FlaskForm):
 
     custom_filters = FieldList(FormField(Range), min_entries=3, max_entries=3)
 
-    nutrition = FieldList(FormField(Range), min_entries=3, max_entries=3)
+    nutrition = FieldList(FormField(Range), min_entries=4, max_entries=4)
 
     apply = SubmitField('Apply')
