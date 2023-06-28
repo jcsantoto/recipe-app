@@ -13,6 +13,7 @@ accounts = Blueprint('accounts', __name__, template_folder="../templates", stati
 client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
+preferences_db = db["preferences"]
 favorites_db = db["favorites"]
 
 
@@ -23,7 +24,7 @@ def account_page():
     email = current_user.email
     intolerance_list = [x for x in IntoleranceOptions]
 
-    intolerance_idx = current_user.intolerances
+    intolerance_idx = current_user.preferences["intolerances"]
     intolerances = ",".join([intolerance_list[x].name for x in intolerance_idx])
 
     favorites = favorites_db.find_one({"username": username})["favorites"]
@@ -40,10 +41,16 @@ def account_settings():
     username = current_user.username
 
     user_info = accounts_db.find_one({"username": username})
+    user_preferences = preferences_db.find_one({"username": username})
 
-    form.intolerances.default = user_info["intolerances"]
+    form.intolerances.default = user_preferences["intolerances"]
 
-    if form.validate_on_submit():
+    macros = user_preferences["macros"]
+    form.carbohydrates.default = macros["carbohydrates"]
+    form.protein.default = macros["protein"]
+    form.fats.default = macros["fats"]
+
+    if form.submit.data and form.validate():
 
         user_info_id = user_info['_id']
 
@@ -66,13 +73,21 @@ def account_settings():
                                    {"$set": {"password": hashed_password}})
 
         # Set Intolerances
-        accounts_db.update_one({"_id": user_info_id},
-                               {"$set": {"intolerances": form.intolerances.data}})
+        preferences_db.update_one({"username": username},
+                                  {"$set": {"intolerances": form.intolerances.data}})
 
-        updated_user = User(current_user.username, current_user.email, current_user.password_hash, current_user.intolerances)
-        login_user(updated_user)
-
+        # Set Macros
+        preferences_db.update_one({"username": username},
+                                  {"$set":
+                                      {"macros": {
+                                          "carbohydrates": form.carbohydrates.data,
+                                          "protein": form.protein.data,
+                                          "fats": form.fats.data
+                                      }}})
         flash("Changes saved")
+
+        updated_user = User(current_user.username, current_user.email, current_user.password_hash)
+        login_user(updated_user)
 
         return redirect("/account")
 

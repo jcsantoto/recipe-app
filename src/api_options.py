@@ -27,6 +27,7 @@ class ApiFilterOptions(Enum):
     Calories = "Calories"
     Carbs = "Carbs"
     Fat = "Fat"
+    Protein = "Protein"
 
 
 class CustomFilterOptions(Enum):
