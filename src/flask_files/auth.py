@@ -1,14 +1,16 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
-from .extensions import login_manager, bcrypt
 from src.flask_files import forms
+from src.flask_files.extensions import login_manager, bcrypt
 from src.flask_files.models import User
 from src.flask_files.database import mongo
 
 # Setting up database
 client = mongo.cx
 db = client["recipeapp"]
-accounts = db["accounts"]
+accounts_db = db["accounts"]
+favorites_db = db["favorites"]
+preferences_db = db["preferences"]
 
 auth = Blueprint('auth', __name__, template_folder="../templates", static_folder="../static")
 login_manager.login_view = 'login'
@@ -28,7 +30,7 @@ def login():
     if form.validate_on_submit():
 
         # looks for entries in the database with a matching email from the form
-        user = accounts.find_one({"email": form.email.data})
+        user = accounts_db.find_one({"email": form.email.data})
 
         # checks if user is not null. checks if password matches
         if user and bcrypt.check_password_hash(user["password"], form.password.data):
@@ -66,11 +68,21 @@ def register():
 
         new_user_info = {"username": form.username.data,
                          "email": form.email.data,
-                         "password": hashed_password,
-                         "intolerances": []
+                         "password": hashed_password
                          }
-        # inserts new entry in database
-        accounts.insert_one(new_user_info)
+
+        new_user_preferences = {
+            "username": form.username.data,
+            "intolerances": [],
+            "macros": {"carbohydrates": None,
+                       "protein": None,
+                       "fats": None}
+        }
+
+        # inserts new entries in database
+        accounts_db.insert_one(new_user_info)
+        preferences_db.insert_one(new_user_preferences)
+        favorites_db.insert_one({"username": form.username.data, "favorites": {}})
 
         flash('Your account has been created! You are now able to log in', 'success')
 
@@ -81,7 +93,7 @@ def register():
 
 @login_manager.user_loader
 def load_user(user_id):
-    user = accounts.find_one({"username": user_id})
+    user = accounts_db.find_one({"username": user_id})
 
     if user:
         return User(user["username"], user["email"], user["password"])
