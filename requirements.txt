@@ -7,3 +7,7 @@ flask-caching==2.0.2
 requests==2.26.0
 pdfkit==1.0.0
 wtforms==3.0.1
+sendgrid==6.10.0
+email_validator>=1.2.1
+itsdangerous~=2.0.1
+python-dotenv==1.0.0

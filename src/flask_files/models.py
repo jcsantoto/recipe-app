@@ -9,10 +9,11 @@ preferences_db = db["preferences"]
 
 class User(UserMixin):
 
-    def __init__(self, username, email, password_hash):
+    def __init__(self, username, email, password_hash, confirmed):
         self.username = username
         self.email = email
         self.password_hash = password_hash
+        self.confirmed = confirmed
         self.preferences = self.load_preferences(username)
         self.favorites = self.load_favorites(username)
 

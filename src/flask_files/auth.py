@@ -4,6 +4,7 @@ from src.flask_files import forms
 from src.flask_files.extensions import login_manager, bcrypt
 from src.flask_files.models import User
 from src.flask_files.database import mongo
+import src.email_util as email_util
 
 # Setting up database
 client = mongo.cx
@@ -34,7 +35,7 @@ def login():
 
         # checks if user is not null. checks if password matches
         if user and bcrypt.check_password_hash(user["password"], form.password.data):
-            user_object = User(user["username"], user["email"], user["password"])
+            user_object = User(user["username"], user["email"], user["password"], user["confirmed"])
 
             # logs user in
             login_user(user_object, remember=form.remember.data)
@@ -68,7 +69,8 @@ def register():
 
         new_user_info = {"username": form.username.data,
                          "email": form.email.data,
-                         "password": hashed_password
+                         "password": hashed_password,
+                         "confirmed": False
                          }
 
         new_user_preferences = {
@@ -84,11 +86,44 @@ def register():
         preferences_db.insert_one(new_user_preferences)
         favorites_db.insert_one({"username": form.username.data, "favorites": {}})
 
-        flash('Your account has been created! You are now able to log in', 'success')
+        # confirmation email
+        token = email_util.generate_token(form.email.data, 'email-confirm')
+        confirmation_link = generate_confirmation_link(token)
+        message = email_util.create_confirmation_email(form.email.data, confirmation_link)
+        email_util.send_email(message)
 
+        flash("Confirmation email has been sent.")
         return redirect("/login")
 
     return render_template("register.html", form=form)
+
+
+@auth.route('/confirm/<token>')
+def confirm_email(token):
+    email = email_util.confirm_token(token, 'email-confirm')
+    if email:
+
+        accounts_db.update_one({"email": email},
+                               {"$set": {"confirmed": True}})
+
+        flash("Account has been verified", 'success')
+        return redirect("/login")
+
+    else:
+        flash("Link has expired", 'failure')
+        return redirect("/login")
+
+
+@auth.route('/resend-confirmation')
+@login_required
+def resend_confirmation():
+    # confirmation email
+    token = email_util.generate_token(current_user.email, 'email-confirm')
+    confirmation_link = generate_confirmation_link(token)
+    message = email_util.create_confirmation_email(current_user.email, confirmation_link)
+    email_util.send_email(message)
+
+    return redirect("/")
 
 
 @login_manager.user_loader
@@ -96,6 +131,12 @@ def load_user(user_id):
     user = accounts_db.find_one({"username": user_id})
 
     if user:
-        return User(user["username"], user["email"], user["password"])
+        return User(user["username"], user["email"], user["password"], user["confirmed"])
 
     return None
+
+
+def generate_confirmation_link(token):
+    confirmation_link = url_for("auth.confirm_email", token=token, _external=True)
+    print(confirmation_link)
+    return confirmation_link

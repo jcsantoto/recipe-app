@@ -151,9 +151,6 @@ def search():
     return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
 
 
-
-
-
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
     recipe_info = Recipe(recipe_id)
@@ -169,7 +166,7 @@ def display_recipe(recipe_id):
         username = current_user.username
 
         user_favorites_info = favorites_db.find_one({"username": username})
-        user_preferences_info = accounts_db.find_one({"username": username})
+        user_preferences_info = preferences_db.find_one({"username": username})
 
         user_favorites = user_favorites_info["favorites"]
         user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
