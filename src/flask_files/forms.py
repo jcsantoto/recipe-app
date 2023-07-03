@@ -56,9 +56,11 @@ class AccountSettingsForm(FlaskForm):
 
     username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
     email = StringField('Email', validators=[Email(), Optional()])
+
     old_password = PasswordField('Old Password', validators=[])
     new_password = PasswordField('New Password', validators=[])
     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
+
     submit = SubmitField('Save Changes')
 
     def validate_username(self, username):

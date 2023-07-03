@@ -28,8 +28,5 @@ class User(UserMixin):
     def get_id(self):
         return self.username
 
-    def get_dict(self):
-        return {"username": self.username, "email": self.email, "password": self.password_hash}
-
     def __repr__(self):
         return f"User('{self.username}', '{self.email}'')"

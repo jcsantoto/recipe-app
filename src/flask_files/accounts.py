@@ -6,8 +6,6 @@ from src.flask_files.models import User
 from src.flask_files.extensions import bcrypt
 from src.api_options import IntoleranceOptions
 
-from enum import Enum
-
 accounts = Blueprint('accounts', __name__, template_folder="../templates", static_folder="../static")
 
 client = mongo.cx
@@ -46,10 +44,16 @@ def account_settings():
     username = current_user.username
 
     user_info = accounts_db.find_one({"username": username})
-    user_preferences = preferences_db.find_one({"username": username})
+    user_preferences = current_user.preferences
 
+    # Displaying current username and email
+    form.username.render_kw = {"placeholder": username}
+    form.email.render_kw = {"placeholder": current_user.email}
+
+    # Displaying saved intolerances
     form.intolerances.default = user_preferences["intolerances"]
 
+    # Displaying saved macros
     macros = user_preferences["macros"]
     form.carbohydrates.default = macros["carbohydrates"]
     form.protein.default = macros["protein"]
@@ -91,12 +95,12 @@ def account_settings():
                                       }}})
         flash("Changes saved")
 
-        updated_user = User(current_user.username, current_user.email, current_user.password_hash)
+        updated_user = User(current_user.username, current_user.email, current_user.password_hash, current_user.confirmed)
         login_user(updated_user)
 
         return redirect("/account")
 
-    else:
+    elif form.errors:
         flash(form.errors)
 
     form.process()
