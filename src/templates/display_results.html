@@ -19,7 +19,18 @@
 
 <div class = "row border" style = "margin-left: 1%; margin-right: 1%;">
 
+
+
     <div class = "col-md-2 border">
+
+        <div class = "btn-group" role = "group" aria-label = "Radio toggle button group">
+            <input type = "radio" class = "btn-check btn-block" name = "btnradio" id = "option1" autocomplete="off" style = "width:50%;" checked>
+            <label class = "btn btn-outline-success" for = "option1">Search by recipe name</label>
+
+            <input type = "radio" class = "btn-check btn-block" name = "btnradio" id = "option2" autocomplete="off" style = "width:50%;">
+            <label class = "btn btn-outline-success" for = "option2">Search by ingredients</label>
+        </div>
+
         <form method="POST" action="">
             {{ form.hidden_tag() }}
 
