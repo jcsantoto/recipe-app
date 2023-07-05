@@ -38,7 +38,7 @@ def search():
     query = request.args.get('query')
 
     form = forms.SortAndFilterOptionsForm()
-    notices = None
+    unselected_intolerances = None
 
     # Set labels on the nutrition filter
     nutrition_labels = ["Calories", "Carbs", "Protein", "Fat"]
@@ -53,21 +53,20 @@ def search():
         form.custom_filters[i].label.text = custom_labels[i]
 
     if form.validate_on_submit():
-        filters = []
+        filters = {}
         custom_filters = {}
-        filter_settings = []
-
-        # diet filter
-        diets = form.diet.data
-
-        # intolerance filter
-        intolerances = form.intolerances.data
 
         # sort
         if form.sort.data != Options.SortOptions.default:
             sort = Options.SortOptions(form.sort.data)
         else:
             sort = None
+
+        # diet filter
+        diets = form.diet.data
+
+        # intolerance filter
+        intolerances = form.intolerances.data
 
         # ingredient filter
         ingredients = form.ingredients.data
@@ -82,13 +81,11 @@ def search():
                 custom_filters[Options.CustomFilterOptions(name)] = {"min": min_val, "max": max_val}
 
         # nutrition filter
-        _parse_nutrition_filter(filter_settings, filters, form.nutrition)
+        _parse_nutrition_filter(filters, form.nutrition)
 
         # If user is logged in, check intolerances
         if current_user.is_authenticated:
-            username = current_user.username
-
-            user_preferences = preferences_db.find_one({"username": username})
+            user_preferences = current_user.preferences
 
             intolerance_list = Options.to_list(Options.IntoleranceOptions)
             user_intolerances_idx = user_preferences["intolerances"]
@@ -96,26 +93,20 @@ def search():
 
             selected_intolerances = form.intolerances.data
 
-            diff = list(set(user_intolerances).difference(selected_intolerances))
-
-            notices = ["Warning: Your user preferences indicate you are intolerant to " + x +
-                       ". The recipes shown may contain this ingredient. Select " + x +
-                       " under the Intolerances section to filter out recipes containing that ingredient"
-                       for x in diff]
+            unselected_intolerances = list(set(user_intolerances).difference(selected_intolerances))
 
         results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, sort=sort, filters=filters,
-                                       filter_settings=filter_settings, diets=diets, ex_ingredients=ingredients,
-                                       intolerances=intolerances, custom_filter=custom_filters)
+                                       diets=diets, ex_ingredients=ingredients, intolerances=intolerances,
+                                       custom_filter=custom_filters)
 
-        return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
+        return render_template('display_results.html', query=query, results=results, form=form,
+                               unselected_intolerances=unselected_intolerances)
 
     else:
 
         # If user is logged in, preselect preferences
         if current_user.is_authenticated:
-            username = current_user.username
-
-            user_preferences = preferences_db.find_one({"username": username})
+            user_preferences = current_user.preferences
 
             intolerance_list = Options.to_list(Options.IntoleranceOptions)
             user_intolerances = user_preferences["intolerances"]
@@ -138,17 +129,16 @@ def search():
                 form.nutrition[3].min_value.data = fats - 5
                 form.nutrition[3].max_value.data = fats + 5
 
-            filters = []
-            filter_settings = []
-            _parse_nutrition_filter(filter_settings, filters, form.nutrition)
+            filters = {}
+            _parse_nutrition_filter(filters, form.nutrition)
 
-            results = recipe_search.search(query, mode=Options.SearchMode.ByName, intolerances=form.intolerances.data,
-                                           filters=filters, filter_settings=filter_settings)
+            results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, filters=filters,
+                                           intolerances=form.intolerances.data)
 
         else:
             results = recipe_search.search(query, mode=Options.SearchMode.ByName)
 
-    return render_template('display_results.html', query=query, results=results, form=form, notices=notices)
+    return render_template('display_results.html', query=query, results=results, form=form)
 
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
@@ -216,13 +206,11 @@ def shopping_list():
     return response
 
 
-def _parse_nutrition_filter(filter_settings, filters, nutrition_form):
+def _parse_nutrition_filter(filters, nutrition_form):
     for field in nutrition_form:
         name = field.label.text
         min_val = field.min_value.data
         max_val = field.max_value.data
 
         if min_val or max_val:
-            filters.append(Options.ApiFilterOptions(name))
-            filter_settings.append({"min": min_val,
-                                    "max": max_val})
+            filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}

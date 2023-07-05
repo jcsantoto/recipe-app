@@ -5,11 +5,14 @@
 <div style = "margin-left: 1%;">
 <h1> Results </h1>
 
-            {% if notices %}
+            {% if unselected_intolerances %}
             <div style = "background-color: yellow;">
-                {% for notice in notices %}
+                {% for item in unselected_intolerances %}
                     <span>
-                        {{ notice }} <br>
+                        Warning: Your user preferences indicate you are intolerant to {{ item }}.
+                        The recipes shown may contain this ingredient.
+                        Select {{ item }} under the Intolerances section to filter out recipes containing that ingredient.
+                        <br>
                     </span>
                 {% endfor %}
             </div>

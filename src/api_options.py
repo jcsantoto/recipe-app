@@ -2,13 +2,32 @@ from enum import Enum
 
 
 def to_list(option_enum: Enum) -> list:
+    """
+    Function to create a list out of an enum.
+    :param option_enum: Type of enum
+    :return: list of values in the enum class
+    """
     return [x for x in option_enum]
 
+
 def idx_to_option(idx: list, option_enum: Enum) -> list:
+    """
+    Creates a list of enum values based on the indices provide
+
+    Example: idx_to_option([1, 2] , IntoleranceOptions) = [egg, gluten]
+
+    :param idx: list of indices
+    :param option_enum: Type of enum
+    :return: List of enum values
+    """
     options = to_list(option_enum)
     return [options[x] for x in idx]
 
+
 class IntoleranceOptions(Enum):
+    """
+    Class to represent all intolerance options supported by the API
+    """
     Dairy = "dairy"
     Egg = "egg"
     Gluten = "gluten"
@@ -24,6 +43,9 @@ class IntoleranceOptions(Enum):
 
 
 class ApiFilterOptions(Enum):
+    """
+    Class to represent nutritional filter options
+    """
     Calories = "Calories"
     Carbs = "Carbs"
     Fat = "Fat"
@@ -31,6 +53,9 @@ class ApiFilterOptions(Enum):
 
 
 class CustomFilterOptions(Enum):
+    """
+    Class to represent filtering options we have implemented that are not provided by the API
+    """
     Price = "Price"
     Servings = "Servings"
     Ingredients = "Ingredients"
@@ -38,7 +63,7 @@ class CustomFilterOptions(Enum):
 
 class SortOptions(Enum):
     """
-    Class used to maintain consistency on the types of sorting options that Spoonacular API offers.
+    Class used to represent the types of sorting options that Spoonacular API offers.
     """
     default = "--"
     popularity = "popularity"
@@ -55,6 +80,9 @@ class SortOptions(Enum):
 
 
 class DietOptions(Enum):
+    """
+    Class used to represent the types of diet that the API can filter by
+    """
     Vegetarian = "vegetarian"
     Vegan = "vegan"
     GlutenFree = "glutenfree"

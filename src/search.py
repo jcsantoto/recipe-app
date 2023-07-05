@@ -5,9 +5,8 @@ from src.search_builder import RecipeSearch
 
 
 def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
-           filters: list[ApiFilterOptions] = None,
+           filters: dict = None,
            custom_filter: dict = None,
-           filter_settings: list[dict] = None,
            diets: list[DietOptions] = None,
            intolerances: list[IntoleranceOptions] = None,
            ex_ingredients: str = None,
@@ -58,7 +57,7 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
 
     # API filters
     if filters:
-        recipe_search.add_filters(filters=filters, filter_settings=filter_settings)
+        recipe_search.add_filters(filters=filters)
 
     # Custom Filters
     if custom_filter:

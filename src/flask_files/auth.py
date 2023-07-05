@@ -6,16 +6,16 @@ from src.flask_files.models import User
 from src.flask_files.database import mongo
 import src.email_util as email_util
 
+auth = Blueprint('auth', __name__, template_folder="../templates", static_folder="../static")
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+
 # Setting up database
 client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
 favorites_db = db["favorites"]
 preferences_db = db["preferences"]
-
-auth = Blueprint('auth', __name__, template_folder="../templates", static_folder="../static")
-login_manager.login_view = 'login'
-login_manager.login_message_category = 'info'
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -24,10 +24,8 @@ def login():
     if current_user.is_authenticated:
         return redirect("/")
 
-    # creates login form object
     form = forms.LoginForm()
 
-    # validates form
     if form.validate_on_submit():
 
         # looks for entries in the database with a matching email from the form
@@ -37,7 +35,6 @@ def login():
         if user and bcrypt.check_password_hash(user["password"], form.password.data):
             user_object = User(user["username"], user["email"], user["password"], user["confirmed"])
 
-            # logs user in
             login_user(user_object, remember=form.remember.data)
 
             flash("Login Successful")
@@ -81,10 +78,15 @@ def register():
                        "fats": None}
         }
 
+        new_user_favorites = {
+            "username": form.username.data,
+            "favorites": {}
+        }
+
         # inserts new entries in database
         accounts_db.insert_one(new_user_info)
         preferences_db.insert_one(new_user_preferences)
-        favorites_db.insert_one({"username": form.username.data, "favorites": {}})
+        favorites_db.insert_one(new_user_favorites)
 
         # confirmation email
         token = email_util.generate_token(form.email.data, 'email-confirm')
