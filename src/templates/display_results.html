@@ -1,7 +1,14 @@
 {% extends "template.html" %}
 
 {% block content %}
+<script>
+    window.myVariable = {{ form.intolerances.choices|safe }};
+</script>
+
 <script src = "../styles/frontend_code.js"></script>
+<script src="{{url_for('static', filename='/js/tags.js')}}"></script>
+<script src="{{url_for('static', filename='/js/optiontags.js')}}"></script>
+
 <div class = "row border" style = "margin-left: 1%; margin-right: 1%;">
     <h1> Results </h1>
 
@@ -74,7 +81,7 @@
                     <h3>Exclude Ingredients</h3>
                 </div>
                 <div class = "row" style = "margin-left:0.5%;">
-                    {{ form.ingredients(class="form-control form-control-lg") }}
+                    {{ form.ingredients(id="input-tag-box", class="form-control form-control-lg") }}
                 </div>
             </div>
 
@@ -95,7 +102,7 @@
                     <h3>Intolerance</h3>
                 </div>
                 <div class = "row" style = "margin-left: 0.5%;">
-                    {{ form.intolerances(class="form-control form-control-lg") }}
+                    {{ form.intolerances(id="option-tag-box", class="form-control form-control-lg") }}
                 </div>
             </div>
 
@@ -157,6 +164,7 @@
     </div>
 
 </div>
+
 
 
 {% endblock %}
