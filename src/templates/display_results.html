@@ -2,7 +2,7 @@
 
 {% block content %}
 <script>
-    window.myVariable = {{ form.intolerances.choices|safe }};
+    window.intolerances = {{ form.intolerances.choices|safe }};
 </script>
 
 <script src = "../styles/frontend_code.js"></script>
@@ -81,7 +81,7 @@
                     <h3>Exclude Ingredients</h3>
                 </div>
                 <div class = "row" style = "margin-left:0.5%;">
-                    {{ form.ingredients(id="input-tag-box", class="form-control form-control-lg") }}
+                    {{ form.ingredients(class="form-control form-control-lg input-tag-box") }}
                 </div>
             </div>
 
@@ -91,7 +91,7 @@
                     <h3>Diet</h3>
                 </div>
                 <div class = "row" style = "margin-left: 0.5%;">
-                    {{ form.diet(class="form-control form-control-lg") }}
+                    {{ form.diet(class="form-control form-control-lg option-tag-box")  }}
                 </div>
             </div>
 
@@ -102,7 +102,7 @@
                     <h3>Intolerance</h3>
                 </div>
                 <div class = "row" style = "margin-left: 0.5%;">
-                    {{ form.intolerances(id="option-tag-box", class="form-control form-control-lg") }}
+                    {{ form.intolerances(class="form-control form-control-lg option-tag-box") }}
                 </div>
             </div>
 

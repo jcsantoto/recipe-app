@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    $('#input-tag-box').selectize({
+    $('.input-tag-box').selectize({
     plugins: ['remove_button'],
     delimiter: ",",
     persist: false,
