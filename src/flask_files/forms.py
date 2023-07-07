@@ -124,8 +124,10 @@ class SortAndFilterOptionsForm(FlaskForm):
     sort = SelectField('Sort', validators=[Optional()], choices=sort_options)
     ingredients = StringField("Ingredients Filter", validators=[Optional()],
                               render_kw={"placeholder": "milk, apple, ..."})
-    diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option)
-    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option)
+    diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option,
+                               render_kw={"placeholder": "Choose a diet"})
+    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option,
+                                       render_kw={"placeholder": "Set intolerances"})
 
     custom_filters = FieldList(FormField(Range), min_entries=3, max_entries=3)
 
