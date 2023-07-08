@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectMultipleField, SelectField, \
-    IntegerField, FieldList, FormField
+    IntegerField, FieldList, FormField, RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
@@ -13,7 +13,9 @@ class SearchForm(FlaskForm):
     """
     Class to help validate and retrieve data from fields in the search bar.
     """
-    query = StringField('query')
+
+    query = StringField('query', render_kw={"placeholder": "Search by name"})
+    submit = SubmitField('Search')
 
 
 class RegistrationForm(FlaskForm):
@@ -134,3 +136,4 @@ class SortAndFilterOptionsForm(FlaskForm):
     nutrition = FieldList(FormField(Range), min_entries=4, max_entries=4)
 
     apply = SubmitField('Apply')
+

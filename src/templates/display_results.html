@@ -1,13 +1,9 @@
 {% extends "template.html" %}
 
 {% block content %}
-<script>
-    window.intolerances = {{ form.intolerances.choices|safe }};
-</script>
 
 <script src = "../styles/frontend_code.js"></script>
 <script src="{{url_for('static', filename='/js/tags.js')}}"></script>
-<script src="{{url_for('static', filename='/js/optiontags.js')}}"></script>
 
 <div class = "row border" style = "margin-left: 1%; margin-right: 1%;">
     <h1> Results </h1>
