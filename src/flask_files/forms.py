@@ -7,7 +7,11 @@ from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
 from src.flask_files.extensions import bcrypt
 from src.api_options import SortOptions, DietOptions, IntoleranceOptions
+from src.flask_files.database import mongo
 
+client = mongo.cx
+db = client["recipeapp"]
+accounts_db = db["accounts"]
 
 class SearchForm(FlaskForm):
     """
@@ -27,6 +31,15 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
+
+    def validate_username(self, username):
+        if accounts_db.find_one({"username": username.data}):
+            raise ValidationError("This username is taken.")
+
+    def validate_email(self, email):
+        if accounts_db.find_one({"email": email.data}):
+            raise ValidationError("An account with this email is already registered.")
+
 
 
 class LoginForm(FlaskForm):
