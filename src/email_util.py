@@ -2,6 +2,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 from src.flask_files.config import Config
+from flask import url_for
 
 serializer = URLSafeTimedSerializer(Config.SECRET_KEY)
 api_key = Config.sendgrid_key
@@ -85,3 +86,8 @@ def confirm_token(token, salt, expiration=900):
         return email
     except:
         return None
+
+
+def generate_confirmation_link(token, route):
+    confirmation_link = url_for(route, token=token, _external=True)
+    return confirmation_link

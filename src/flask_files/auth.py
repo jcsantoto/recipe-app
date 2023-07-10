@@ -16,6 +16,7 @@ db = client["recipeapp"]
 accounts_db = db["accounts"]
 favorites_db = db["favorites"]
 preferences_db = db["preferences"]
+email_confirmations = db["email_confirmations"]
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -90,7 +91,7 @@ def register():
 
         # confirmation email
         token = email_util.generate_token(form.email.data, 'email-confirm')
-        confirmation_link = generate_confirmation_link(token)
+        confirmation_link = email_util.generate_confirmation_link(token, "auth.confirm_email")
         message = email_util.create_confirmation_email(form.email.data, confirmation_link)
         email_util.send_email(message)
 
@@ -116,12 +117,36 @@ def confirm_email(token):
         return redirect("/login")
 
 
+@auth.route('/confirm-change/<token>')
+def confirm_change_email(token):
+    email = email_util.confirm_token(token, 'email-confirm')
+    if email:
+
+        record = email_confirmations.find_one({"token": token})
+        account_id = record["id"]
+
+        accounts_db.update_one({"_id": account_id},
+                               {"$set":
+                                    {"confirmed": True,
+                                     "email": email
+                                     }})
+
+        email_confirmations.delete_one({"token": token})
+
+        flash("Your new email has been verified.", 'success')
+        return redirect("/login")
+
+    else:
+        flash("Link has expired", 'failure')
+        return redirect("/login")
+
+
 @auth.route('/resend-confirmation')
 @login_required
 def resend_confirmation():
     # confirmation email
     token = email_util.generate_token(current_user.email, 'email-confirm')
-    confirmation_link = generate_confirmation_link(token)
+    confirmation_link = email_util.generate_confirmation_link(token)
     message = email_util.create_confirmation_email(current_user.email, confirmation_link)
     email_util.send_email(message)
 
@@ -136,9 +161,3 @@ def load_user(user_id):
         return User(user["username"], user["email"], user["password"], user["confirmed"])
 
     return None
-
-
-def generate_confirmation_link(token):
-    confirmation_link = url_for("auth.confirm_email", token=token, _external=True)
-    print(confirmation_link)
-    return confirmation_link
