@@ -8,6 +8,7 @@ from src.flask_files.database import mongo
 from src import api_options as Options
 from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
+from src.Subsitute import get_substitute_by_name
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -172,6 +173,10 @@ def display_recipe(recipe_id):
             favorite = True
 
         if request.method == 'POST':
+
+            if 'ingredient name' in request.form:
+                ingredients = request.form.get('ingredient name')
+                substitutes = get_substitute_by_name(ingredients)
 
             # Favorite recipe
             if recipe_id in user_favorites:

@@ -45,6 +45,7 @@
 
 <div class = "row border" style = "margin-left: 1%; margin-right: 1%; margin-top: 2%;">
     <h2> Ingredients </h2>
+    <h8> Tip: Click the ingredient to find subs.</h8>
 </div>
 
 {% if contains_intolerances %}
@@ -64,7 +65,8 @@
         <li>
         {{ ingr["amount"] }}
         {{ ingr["unit"] }}
-        {{ ingr["name"] }}
+            <button type = "button" name = "ingredient name" style="background color: transparent; border: none"
+                    value={{ ingr["name"] }}> {{ ingr["name"] }}
         </li>
         </ul>
         </p>
