@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, redirect, render_template, flash
+from flask import Blueprint, request, url_for, redirect, render_template, flash, jsonify
 from flask_login import current_user, login_required, login_user, logout_user
 from src.flask_files import forms
 from src.flask_files.database import mongo
@@ -17,7 +17,7 @@ favorites_db = db["favorites"]
 email_confirmations = db["email_confirmations"]
 
 
-@accounts.route("/account")
+@accounts.route("/account", methods=['GET', 'POST'])
 @login_required
 def account_page():
     username = current_user.username
@@ -31,6 +31,14 @@ def account_page():
 
     return render_template("account.html", username=username, email=email, intolerances=intolerances,
                            favorites=favorites)
+
+
+@accounts.route("/account/favorites", methods=['GET', 'POST'])
+@login_required
+def account_favorites():
+    favorites = current_user.favorites['favorites']
+
+    return render_template('account_favorites.html', favorites=favorites)
 
 
 @accounts.route("/account/settings", methods=['GET', 'POST'])
@@ -129,3 +137,5 @@ def account_settings():
 
     form.process()
     return render_template("account_settings.html", form=form)
+
+
