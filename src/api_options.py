@@ -99,5 +99,6 @@ class SearchMode(Enum):
     """
     Class used to maintain consistency on the type of search we are performing on the API.
     """
-    ByIngredients = 0
     ByName = 1
+    ByIngredients = 2
+

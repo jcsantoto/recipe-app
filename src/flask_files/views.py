@@ -20,7 +20,10 @@ favorites_db = db["favorites"]
 
 @views.route("/", methods=['GET'])
 def home_page():
-    return render_template("index.html")
+
+    form = forms.SearchForm()
+
+    return render_template("index.html", form=form)
 
 
 @views.route("/about")
@@ -36,6 +39,8 @@ def password_reset():
 @views.route("/search", methods=['GET', 'POST'])
 def search():
     query = request.args.get('query')
+
+    mode = Options.SearchMode(int(request.args.get('mode')))
 
     form = forms.SortAndFilterOptionsForm()
     unselected_intolerances = None
@@ -95,7 +100,7 @@ def search():
 
             unselected_intolerances = list(set(user_intolerances).difference(selected_intolerances))
 
-        results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, sort=sort, filters=filters,
+        results = recipe_search.search(query=query, mode=mode, sort=sort, filters=filters,
                                        diets=diets, ex_ingredients=ingredients, intolerances=intolerances,
                                        custom_filter=custom_filters)
 
@@ -132,11 +137,11 @@ def search():
             filters = {}
             _parse_nutrition_filter(filters, form.nutrition)
 
-            results = recipe_search.search(query=query, mode=Options.SearchMode.ByName, filters=filters,
+            results = recipe_search.search(query=query, mode=mode, filters=filters,
                                            intolerances=form.intolerances.data)
 
         else:
-            results = recipe_search.search(query, mode=Options.SearchMode.ByName)
+            results = recipe_search.search(query, mode=mode)
 
     return render_template('display_results.html', query=query, results=results, form=form)
 
