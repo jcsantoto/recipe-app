@@ -45,7 +45,6 @@
                     <h3> {{ form.sort.label(class="form-control-label") }} </h3>
                 </div>
 
-
                 <!-- 0th section for sort dropdown-->
                 <div class = "row" style = "margin-left:0%; margin-right: 0%;  margin-bottom: 3%;">
                     {{ form.sort(class="form-control form-control-lg") }}
@@ -54,25 +53,30 @@
 
             <!--First section for price filter-->
             <div class = "row" style = "margin-top: 3%;">
-                <div class = "row" style = "margin-top: 0%;">
+
 
                     {% for nested in form.custom_filters %}
                         {{ nested.csrf_token }}
                     <div class = "row border-bottom border-2" style = "margin-top: 1%; margin-left: 0%; margin-right: 0%;">
-                        <div class = "row" style = "margin-bottom: 3%;">
-                            <h3> {{ nested.label }} </h3>
-                            <div class = "col">
-                                {{ nested.min_value(class="form-control form-control-lg") }}
+
+                            <div class = "row" style = "padding-left: 0;">
+                                <h3> {{ nested.label }} </h3>
                             </div>
-                            <div class = "col">
-                                {{ nested.max_value(class="form-control form-control-lg") }}
+
+                            <div class = "row" style="margin-bottom: 3%;">
+                                <div class = "col">
+                                    {{ nested.min_value(class="form-control form-control-lg") }}
+                                </div>
+                                <div class = "col">
+                                    {{ nested.max_value(class="form-control form-control-lg") }}
+                                </div>
                             </div>
-                        </div>
+
                     </div>
 
                     {% endfor %}
 
-                </div>
+
             </div>
 
 
@@ -109,29 +113,30 @@
 
 
             <!--Third section for nutritional filter-->
-            <div class = "row border-bottom border-2" style = "margin-top: 3%;">
-                <div class = "row">
-                    <h3>Nutritional Filter</h3>
-                </div>
-                <div class = "row" style = "margin-bottom: 0%;">
+             <div class = "row" style = "margin-top: 3%;">
+
+
                     {% for nested in form.nutrition %}
                         {{ nested.csrf_token }}
-                    <div class = "row border-bottom border-2" style = "margin-top: 1%;">
-                        <div class = "row" style = "margin-bottom:3%;">
-                            <h4> {{ nested.label }} </h4>
+                    <div class = "row border-bottom border-2" style = "margin-top: 1%; margin-left: 0%; margin-right: 0%;">
 
-                            <div class = "col">
-                                {{ nested.min_value(class="form-control form-control-lg") }}
+                            <div class = "row" style = "padding-left: 0;">
+                                <h3> {{ nested.label }} </h3>
                             </div>
-                            <div class = "col">
-                                {{ nested.max_value(class="form-control form-control-lg") }}
+
+                            <div class = "row" style="margin-bottom: 3%;">
+                                <div class = "col">
+                                    {{ nested.min_value(class="form-control form-control-lg") }}
+                                </div>
+                                <div class = "col">
+                                    {{ nested.max_value(class="form-control form-control-lg") }}
+                                </div>
                             </div>
-                        </div>
+
                     </div>
 
                     {% endfor %}
 
-                </div>
 
             </div>
 
