@@ -16,6 +16,7 @@ db = client["recipeapp"]
 accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
+S_history = db["SearchHistory"]
 
 
 @views.route("/", methods=['GET'])
@@ -168,6 +169,8 @@ def display_recipe(recipe_id):
 
         contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
+        Search_History(recipe_id, current_user)
+
         if recipe_id in user_favorites:
             favorite = True
 
@@ -219,3 +222,39 @@ def _parse_nutrition_filter(filters, nutrition_form):
 
         if min_val or max_val:
             filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}
+
+def Search_History(recipe_id, currentuser):
+    check_user = S_history.find_one({"user_name": currentuser.username})
+
+    if check_user == None:
+
+        S_history.insert_one({"user_name": currentuser.username,"recipe_id": [recipe_id]})
+
+    elif recipe_id in check_user["recipe_id"]:
+        recipe_list = check_user["recipe_id"]
+        recipe_list.insert(0, recipe_list.pop(recipe_list.index(recipe_list)))
+        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+
+    elif len(check_user["recipe_id"]) == 15:
+        recipe_list = check_user["recipe_id"]
+        recipe_list.pop(14)
+        recipe_list.insert(0,recipe_id)
+        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+
+
+
+    else:
+        recipe_list = check_user["recipe_id"]
+        recipe_list.insert(0, recipe_id)
+        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+
+
+
+
+
+
+
+
+
+
+    return "complete"
