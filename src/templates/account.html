@@ -2,56 +2,78 @@
 
 {% block content %}
 
-    <div class = "d-flex justify-content-center">
+    <script src="{{url_for('static', filename='/js/account.js')}}"></script>
 
-        <div class = "container">
+    <div class="sidenav m-3">
+        <nav id="dynamic">
+            <a class = "active" href="#" data-target="overview">Overview</a>
+            <a href="#">My Recipes</a>
+            <a href="#" data-target="favorites">Favorites</a>
+            <a href="#">History</a>
+            <a href="#" data-target="settings">Settings</a>
+        </nav>
+    </div>
 
-            <div class = "row">
-                <h1>Account Information</h1>
 
-            </div>
+    <div class = "d-flex flex-column justify-content-center" style="margin-right: 25%; margin-left: 25%;">
 
-            <div class = "row">
-                <div class = "col-md-2">
-                    <h2>Username: </h2>
+        <div id = "overview" class = "content-section loaded">
+
+            <div class = "d-flex flex-row justify-content-center">
+
+                <div class = "card m-3 flex-fill">
+                    <div class = "p-3" >
+                        <h1>User Info</h1>
+                    </div>
+
+                    <div class = "p-3">
+                        <div class = "d-flex flex-row">
+                            <h3>Username:</h3>
+                        </div>
+
+                        <div class = "d-flex flex-row">
+                            <p> {{ username }} </p>
+                        </div>
+
+                        <div class = "d-flex flex-row">
+                            <h3>Email: </h3>
+                        </div>
+                        <div class = "d-flex flex-row">
+                            <p> {{ email }} </p>
+                        </div>
+                    </div>
+
                 </div>
-                <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ username }} readonly/>
-                </div>
-            </div>
 
-            <div class = "row">
-                <div class = "col-md-2">
-                    <h2>Email: </h2>
-                </div>
-                <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ email }} readonly/>
-                </div>
-            </div>
+                <div class = "card m-3 flex-fill">
+                    <div class = "p-3">
+                        <h1>Preferences</h1>
+                    </div>
 
-            <div class = "row">
-                <div class = "col-md-2">
-                    <h2>Allergies: </h2>
-                </div>
-                <div class = "col-md-4">
-                    <input type = "text" class = "form-control" value = {{ intolerances }} readonly/>
-                </div>
-            </div>
+                    <div class = "p-3">
+                        <div class = "d-flex flex-row">
+                            <h2>Allergies: </h2>
+                        </div>
+                        <div class = "d-flex flex-row">
+                            <p> {{ intolerances }} </p>
+                        </div>
+                    </div>
 
-            <div class = "row" style="margin-top: 3%;">
-                <h2>Favorite Recipes</h2>
-            </div>
+                </div>
 
-            <div class = "row" style = "margin-left: 1%;">
-                <ul>
-                    <li>Favorite Recipe 1</li>
-                    <li>Favorite Recipe 2</li>
-                    <li>Favorite Recipe 3</li>
-                </ul>
             </div>
 
         </div>
-        
+
+        <div id = "favorites" class = "content-section">
+
+        </div>
+
+        <div id = "settings" class = "content-section">
+
+        </div>
+
+
 
     </div>
 

@@ -2,26 +2,49 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row" style = "margin-left: 1%; margin-right: 1%;">
 
-    <div class="col-md-1">
-        <h2> Recipe Info </h2>
+    <div class = "row border-bottom border-2">
+        <div class="col-md-auto">
+            <h2>Recipe Info</h2>
+        </div>
+
+        <div class="col">
+            <a href="/pdf">Print PDF</a>
+        </div>
     </div>
+
     <div class="col-md-10">
-        <a href="/pdf"> Print PDF </a>
+        {% if current_user.is_authenticated and current_user.confirmed %}
+
+                <button class="favorite-btn" data-recipe-id="{{ recipe_id }}">
+                    {% if favorite %}
+                        Unfavorite
+                    {% else %}
+                        Favorite
+                    {% endif %}
+                </button>
+        {% endif %}
     </div>
+
 
 </div>
 
-<h3> {{ title }} </h3>
+<div class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%;">
+    <h3> {{ title }} </h3>
+</div>
 
+<div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-top: 1%">
+    <h2> Summary </h2>
+</div>
 
+<div class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%; margin-top: 0.5%;">
+    <p> {{ summary|safe }} </p>
+</div>
 
-<h2> Summary </h2>
-
-<p> {{ summary|safe }} </p>
-
-<h2> Ingredients </h2>
+<div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-top: 1%;">
+    <h2> Ingredients </h2>
+</div>
 
 {% if contains_intolerances %}
     <div style = "background-color: yellow;">
@@ -33,9 +56,10 @@
     </div>
 {% endif %}
 
+<div class = "row border-bottom border-2" style = "margin-left: 2%; margin-right: 1%; margin-top: 0.5%;">
     {% for ingr in ingredients %}
         <p>
-        <ul style="list-style-type:square">
+        <ul style="list-style-type:square; line-height: 0px;">
         <li>
         {{ ingr["amount"] }}
         {{ ingr["unit"] }}
@@ -44,18 +68,25 @@
         </ul>
         </p>
     {% endfor %}
+</div>
 
-<h2> Instructions </h2>
-
+<div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-bottom: 0.5%; margin-top: 1%;">
+    <h2> Instructions </h2>
+</div>
+<div class = "border-bottom border-2">
     {% for instr in instructions %}
+<div class = "row" style = "margin-left: 1%; margin-right: 1%;">
     <p>
         <b> Step {{ instr["number"] }} </b>
         <br>
         <div style="margin-top: 1px;"> {{ instr["step"] }} </div>
     </p>
+</div>
     {% endfor %}
+</div>
 
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{url_for('static', filename='/js/favorite.js')}}"></script>
 
 {% endblock %}

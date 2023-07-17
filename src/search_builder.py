@@ -1,5 +1,5 @@
 from __future__ import annotations
-from src.api_options import FilterOptions, DietOptions, IntoleranceOptions
+from src.api_options import ApiFilterOptions, DietOptions, IntoleranceOptions
 
 APIKEY = "b9f570c04c8a44229ffd38618ddfabe2"
 
@@ -56,20 +56,17 @@ class RecipeSearch:
 
         return self
 
-    def add_filters(self, filters: list[FilterOptions], filter_settings: list[dict]) -> RecipeSearch:
+    def add_filters(self, filters: dict) -> RecipeSearch:
         """
         Structures URL to have the necessary elements to perform all filters specified.
         :param filters: List of filter options
         :param filter_settings: List of filter parameters
         :return: min and max values for price filter and a flag for price filter.d
         """
-        num_filters = len(filters)
-        for i in range(num_filters):
 
-            if filters[i] != FilterOptions.Price:
-                min_val = filter_settings[i]["min"]
-                max_val = filter_settings[i]["max"]
-                self.add_filter(filters[i].value, min_val, max_val)
+        for item in filters:
+            filter_range = filters[item]
+            self.add_filter(item.value, filter_range["min"], filter_range["max"])
 
         return self
 
@@ -109,6 +106,10 @@ class RecipeSearch:
         self.querystring["addRecipeInformation"] = "true"
         return self
 
+    def add_recipe_nutrition(self) -> RecipeSearch:
+        self.querystring["addRecipeNutrition"] = "true"
+        return self
+
     def add_offset(self, offset: int) -> RecipeSearch:
         """
         Specifies how many results to skip ahead when returning the list of recipes.
@@ -139,5 +140,3 @@ class RecipeSearch:
         :return: the parameters of the query as a dict.
         """
         return self.querystring
-
-

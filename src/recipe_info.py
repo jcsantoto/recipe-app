@@ -19,6 +19,10 @@ class Recipe:
         self.recipe_info = requests.get(url).json()
 
     def get_all(self):
+        """
+        Returns the recipe info dictionary
+        :return: recipe info dictionary
+        """
         return self.recipe_info
 
     def get_title(self) -> str:
@@ -71,7 +75,11 @@ class Recipe:
         return self.recipe_info['analyzedInstructions'][0]['steps']
 
     def contains_intolerances(self, user_intolerances: list[IntoleranceOptions]) -> list:
-
+        """
+        Checks if the recipe contains any of the intolerances that the user has specified.
+        :param user_intolerances: The user's intolerances
+        :return: list of intolerances that the recipe contains
+        """
         contained_intolerances = []
         ingredients = self.get_ingredients()
 

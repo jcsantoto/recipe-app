@@ -1,19 +1,25 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectMultipleField, SelectField, \
-    IntegerField, FieldList, FormField
+    IntegerField, FieldList, FormField, RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
 from src.flask_files.extensions import bcrypt
 from src.api_options import SortOptions, DietOptions, IntoleranceOptions
+from src.flask_files.database import mongo
 
+client = mongo.cx
+db = client["recipeapp"]
+accounts_db = db["accounts"]
 
 class SearchForm(FlaskForm):
     """
     Class to help validate and retrieve data from fields in the search bar.
     """
-    query = StringField('query')
+
+    query = StringField('query', render_kw={"placeholder": "Search by name"})
+    submit = SubmitField('Search')
 
 
 class RegistrationForm(FlaskForm):
@@ -25,6 +31,15 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
+
+    def validate_username(self, username):
+        if accounts_db.find_one({"username": username.data}):
+            raise ValidationError("This username is taken.")
+
+    def validate_email(self, email):
+        if accounts_db.find_one({"email": email.data}):
+            raise ValidationError("An account with this email is already registered.")
+
 
 
 class LoginForm(FlaskForm):
@@ -46,14 +61,21 @@ class AccountSettingsForm(FlaskForm):
                            (5, "Seafood"), (6, "Sesame"), (7, "Shellfish"), (8, "Soy"),
                            (9, "Sulfite"), (10, "Tree Nut"), (11, "Wheat")]
 
-    username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
-    email = StringField('Email', validators=[Email(), Optional()])
     intolerances = SelectMultipleField('Intolerances', validators=[Optional()], choices=intolerance_choices,
                                        widget=ListWidget(prefix_label=False), option_widget=CheckboxInput(),
                                        coerce=int)
+
+    protein = IntegerField('Protein', validators=[Optional()], render_kw={"placeholder": "-"})
+    carbohydrates = IntegerField('Carbohydrates', validators=[Optional()], render_kw={"placeholder": "-"})
+    fats = IntegerField('Fats', validators=[Optional()], render_kw={"placeholder": "-"})
+
+    username = StringField('Username', validators=[Length(min=2, max=20), Optional()])
+    email = StringField('Email', validators=[Email(), Optional()])
+
     old_password = PasswordField('Old Password', validators=[])
     new_password = PasswordField('New Password', validators=[])
     confirm_password = PasswordField('Confirm Password', validators=[EqualTo('new_password')])
+
     submit = SubmitField('Save Changes')
 
     def validate_username(self, username):
@@ -117,12 +139,14 @@ class SortAndFilterOptionsForm(FlaskForm):
     sort = SelectField('Sort', validators=[Optional()], choices=sort_options)
     ingredients = StringField("Ingredients Filter", validators=[Optional()],
                               render_kw={"placeholder": "milk, apple, ..."})
-    diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option)
-    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option)
+    diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option,
+                               render_kw={"placeholder": "Choose a diet"})
+    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option,
+                                       render_kw={"placeholder": "Set intolerances"})
 
-    min_price = IntegerField("Min Price", validators=[Optional()], render_kw={"placeholder": "Min"})
-    max_price = IntegerField("Max Price", validators=[Optional()], render_kw={"placeholder": "Max"})
+    custom_filters = FieldList(FormField(Range), min_entries=3, max_entries=3)
 
-    nutrition = FieldList(FormField(Range), min_entries=3, max_entries=3)
+    nutrition = FieldList(FormField(Range), min_entries=4, max_entries=4)
 
     apply = SubmitField('Apply')
+
