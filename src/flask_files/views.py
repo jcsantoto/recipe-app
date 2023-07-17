@@ -16,12 +16,11 @@ db = client["recipeapp"]
 accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
-S_history = db["SearchHistory"]
+search_history = db["SearchHistory"]
 
 
 @views.route("/", methods=['GET'])
 def home_page():
-
     form = forms.SearchForm()
 
     return render_template("index.html", form=form)
@@ -169,7 +168,7 @@ def display_recipe(recipe_id):
 
         contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
-        Search_History(recipe_id, current_user)
+        add_to_search_history(recipe_id, title)
 
         if recipe_id in user_favorites:
             favorite = True
@@ -223,38 +222,39 @@ def _parse_nutrition_filter(filters, nutrition_form):
         if min_val or max_val:
             filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}
 
-def Search_History(recipe_id, currentuser):
-    check_user = S_history.find_one({"user_name": currentuser.username})
 
-    if check_user == None:
+def add_to_search_history(recipe_id, recipe_name):
+    user_history = search_history.find_one({"username": current_user.username})
 
-        S_history.insert_one({"user_name": currentuser.username,"recipe_id": [recipe_id]})
+    if user_history is None:
+        search_history.insert_one({"username": current_user.username,
+                                   "recipes": [{"recipe_id": recipe_id,
+                                                "recipe_name": recipe_name
+                                                }]
+                                   })
 
-    elif recipe_id in check_user["recipe_id"]:
-        recipe_list = check_user["recipe_id"]
-        recipe_list.insert(0, recipe_list.pop(recipe_list.index(recipe_list)))
-        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+        return
 
-    elif len(check_user["recipe_id"]) == 15:
-        recipe_list = check_user["recipe_id"]
-        recipe_list.pop(14)
-        recipe_list.insert(0,recipe_id)
-        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+    recipe_list = user_history["recipes"]
+    existing_id = next((d for d in recipe_list if d["recipe_id"] == recipe_id), None)
 
+    if existing_id:
+        recipe_list.remove(existing_id)
+        recipe_list.insert(0, existing_id)
 
+        search_history.update_one({"username": current_user.username},{"$set":{"recipes": recipe_list}})
+
+    elif len(user_history["recipes"]) == 15:
+        recipe_list.remove(14)
+        recipe_list.insert(0,
+                           {"recipe_id": recipe_id,
+                            "recipe_name": recipe_name})
+
+        search_history.update_one({"username": current_user.username}, {"$set": {"recipes": recipe_list}})
 
     else:
-        recipe_list = check_user["recipe_id"]
-        recipe_list.insert(0, recipe_id)
-        S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
+        recipe_list.insert(0,
+                           {"recipe_id": recipe_id,
+                            "recipe_name": recipe_name})
 
-
-
-
-
-
-
-
-
-
-    return "complete"
+        search_history.update_one({"username": current_user.username}, {"$set": {"recipes": recipe_list}})
