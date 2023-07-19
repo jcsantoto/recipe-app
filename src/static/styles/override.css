@@ -4,3 +4,29 @@
     border: 1px solid #dee2e6 !important;
 
 }
+
+
+.carousel-indicators button{
+  background-color: gray !important;
+  border: 1px solid #777;
+  width: 15px;
+  height: 15px;
+  margin: 0 4px;
+  border-radius: 25%;
+}
+
+.carousel-indicators {
+  position: static !important;
+}
+
+.carousel-indicators .active {
+  background-color: black !important;
+}
+
+.carousel-control-prev-icon {
+ background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2ffff'><path d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/></svg>") !important;
+}
+
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2ffff'><path d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/></svg>") !important;
+}

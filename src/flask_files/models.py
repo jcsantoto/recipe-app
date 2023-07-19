@@ -5,6 +5,7 @@ client = mongo.cx
 db = client["recipeapp"]
 favorites_db = db["favorites"]
 preferences_db = db["preferences"]
+recommendation_db = db["recommendation"]
 
 
 class User(UserMixin):
@@ -16,6 +17,10 @@ class User(UserMixin):
         self.confirmed = confirmed
         self.preferences = self.load_preferences(username)
         self.favorites = self.load_favorites(username)
+
+    def load_recommendations(self):
+        recommendations = recommendation_db.find_one({"username": self.username})
+        return recommendations
 
     def load_preferences(self, username):
         preferences = preferences_db.find_one({"username": username})

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
 from flask_login import current_user, login_required
 import pdfkit
+import random
+import time
 
 import src.search as recipe_search
 from src.flask_files import forms
@@ -8,6 +10,7 @@ from src.flask_files.database import mongo
 from src import api_options as Options
 from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
+from src.recipe_recommend import get_similar_recipe
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -17,12 +20,65 @@ accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
 S_history = db["SearchHistory"]
+recommendation_db = db["recommendation"]
 
 
 @views.route("/", methods=['GET'])
 def home_page():
-
     form = forms.SearchForm()
+
+    if current_user.is_authenticated:
+
+        favorites = current_user.favorites['favorites']
+
+        recommendations = current_user.load_recommendations()
+
+        # If recommendation already exists
+        if recommendations:
+
+            # Check timestamp of when recommendation was given
+            last_recommended_timestamp = recommendations["timestamp"]
+
+            current_timestamp = time.time()
+
+            elapsed_time = current_timestamp - last_recommended_timestamp
+
+            # If recommendation is more than 2 hours old, generate new recommendation
+            if elapsed_time >= 7200:
+
+                basis, recommended_recipes = generate_recommendations()
+
+                # update recommendation in database
+                recommendation_db.update_one({"username": current_user.username},
+                                             {"$set":{
+                                                 "username": current_user.username,
+                                                 "timestamp": time.time(),
+                                                 "recipes": recommended_recipes,
+                                                 "basis": basis
+                                             }})
+
+            # If not, display stored recommendation
+            else:
+                basis = recommendations['basis']
+                recommended_recipes = recommendations['recipes']
+
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
+
+        # If recommendation doesn't exist, and if user has favorites,
+        elif favorites:
+
+            # generate new recommendation
+            basis, recommended_recipes = generate_recommendations()
+
+            # put recommendation in database with timestamp
+            recommendation_db.insert_one({
+                "username": current_user.username,
+                "timestamp": time.time(),
+                "recipes": recommended_recipes,
+                "basis": basis
+            })
+
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
 
     return render_template("index.html", form=form)
 
@@ -154,7 +210,7 @@ def display_recipe(recipe_id):
     summary = clean_summary(recipe_info.get_summary())
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
-    time = recipe_info.get_prep_time()
+    prep_time = recipe_info.get_prep_time()
     contains_intolerances = None
     favorite = False
 
@@ -169,7 +225,7 @@ def display_recipe(recipe_id):
 
         contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
-        Search_History(recipe_id, current_user)
+        # Search_History(recipe_id, current_user)
 
         if recipe_id in user_favorites:
             favorite = True
@@ -189,7 +245,7 @@ def display_recipe(recipe_id):
     session["title"] = title
     session["ingredients"] = ingredients
     session["instructions"] = instructions
-    session["time"] = time
+    session["time"] = prep_time
 
     return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
                            instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
@@ -223,12 +279,13 @@ def _parse_nutrition_filter(filters, nutrition_form):
         if min_val or max_val:
             filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}
 
+
 def Search_History(recipe_id, currentuser):
     check_user = S_history.find_one({"user_name": currentuser.username})
 
     if check_user == None:
 
-        S_history.insert_one({"user_name": currentuser.username,"recipe_id": [recipe_id]})
+        S_history.insert_one({"user_name": currentuser.username, "recipe_id": [recipe_id]})
 
     elif recipe_id in check_user["recipe_id"]:
         recipe_list = check_user["recipe_id"]
@@ -238,7 +295,7 @@ def Search_History(recipe_id, currentuser):
     elif len(check_user["recipe_id"]) == 15:
         recipe_list = check_user["recipe_id"]
         recipe_list.pop(14)
-        recipe_list.insert(0,recipe_id)
+        recipe_list.insert(0, recipe_id)
         S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
 
 
@@ -248,13 +305,29 @@ def Search_History(recipe_id, currentuser):
         recipe_list.insert(0, recipe_id)
         S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
 
-
-
-
-
-
-
-
-
-
     return "complete"
+
+
+def generate_recommendations():
+    favorites = current_user.favorites['favorites']
+
+    if favorites:
+        recipe_name = random.choice(list(favorites.values()))
+
+        extracted_recipes = []
+
+        similar_recipes = get_similar_recipe(recipe_name)
+
+        for item in similar_recipes:
+
+            if item['title'] == recipe_name:
+                continue
+
+            extracted_recipes.append({
+                "title": item['title'],
+                "id": item['id'],
+                "image": item['image']
+
+            })
+
+    return recipe_name, extracted_recipes
