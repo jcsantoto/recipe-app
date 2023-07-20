@@ -1,6 +1,7 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
 from flask_login import current_user, login_required
 import pdfkit
+from bson.objectid import ObjectId
 
 import src.search as recipe_search
 from src.flask_files import forms
@@ -8,6 +9,7 @@ from src.flask_files.database import mongo
 from src import api_options as Options
 from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
+from src.user_recipes import UserRecipe, decompress_data
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -17,7 +19,7 @@ accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
 S_history = db["SearchHistory"]
-
+user_recipes = db["user_recipes"]
 
 @views.route("/", methods=['GET'])
 def home_page():
@@ -35,6 +37,76 @@ def about_page():
 @views.route("/passreset")
 def password_reset():
     return render_template("password_reset.html")
+
+
+@views.route("/community",  methods=['GET', 'POST'])
+@login_required
+def community_home():
+    form = forms.SearchForm()
+
+    return render_template("community.html", form=form)
+
+
+@views.route("/community/search",  methods=['GET', 'POST'])
+@login_required
+def search_user_recipe():
+    query = request.args.get('query')
+    # user_recipes.create_index([('title', 'text'), ('ingredients', 'text')])
+
+    results = user_recipes.find({"$text": {"$search": query}})
+
+    recipes = []
+    for item in results:
+        recipes.append({
+            "id": str(item['_id']),
+            "title": item['title'],
+            'description': decompress_data(item['description'])
+        })
+
+    return render_template("display_user_recipes.html", results=recipes)
+
+
+
+@views.route("/submit-recipe",  methods=['GET', 'POST'])
+@login_required
+def submit_recipe():
+
+    form = forms.UserRecipeForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+        time = form.time.data
+        ingredients = form.ingredients.data
+        instructions = form.instructions.data
+        diet = form.diet.data
+        intolerances = form.intolerances.data
+
+        for item in ingredients:
+            del item['csrf_token']
+
+        for item in instructions:
+            del item['csrf_token']
+
+        recipe = UserRecipe()
+
+        recipe.set_title(title)
+        recipe.set_description(description)
+        recipe.set_time(time)
+        recipe.set_diets(diet)
+        recipe.set_intolerances(intolerances)
+        recipe.set_ingredients(ingredients)
+        recipe.set_instructions(instructions)
+
+        recipe.set_owner(current_user.username)
+
+        recipe.add_to_database()
+
+        flash("Recipe successfully submitted")
+
+        return redirect("/community")
+
+    return render_template("submit_recipe.html", form=form)
 
 
 @views.route("/search", methods=['GET', 'POST'])

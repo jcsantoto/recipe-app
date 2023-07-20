@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectMultipleField, SelectField, \
-    IntegerField, FieldList, FormField, RadioField
+    IntegerField, FieldList, FormField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
@@ -150,3 +150,32 @@ class SortAndFilterOptionsForm(FlaskForm):
 
     apply = SubmitField('Apply')
 
+
+class IngredientForm(FlaskForm):
+    ingredient = StringField('Ingredient')
+    amount = IntegerField("Amount")
+    unit = StringField("Unit")
+
+
+class InstructionForm(FlaskForm):
+    step = TextAreaField('Step')
+
+
+class UserRecipeForm(FlaskForm):
+
+    diet_option = [e.value for e in DietOptions]
+    intolerance_option = [e.value for e in IntoleranceOptions]
+
+    title = StringField('Title', validators=[Optional()] )
+    description = TextAreaField('Description' , validators=[Optional()])
+    time = IntegerField("Time" , validators=[Optional()])
+    ingredients = FieldList(FormField(IngredientForm), min_entries=1 , validators=[Optional()])
+    instructions = FieldList(FormField(InstructionForm), min_entries=1 , validators=[Optional()])
+
+    diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option,
+                               render_kw={"placeholder": "Choose a diet"})
+
+    intolerances = SelectMultipleField('Intolerance', validators=[Optional()], choices=intolerance_option,
+                                       render_kw={"placeholder": "Set intolerances"})
+
+    submit = SubmitField('Submit Recipe')
