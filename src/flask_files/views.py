@@ -6,7 +6,7 @@ import src.search as recipe_search
 from src.flask_files import forms
 from src.flask_files.database import mongo
 from src import api_options as Options
-from src.recipe_info import Recipe
+from src.recipe_info import Recipe, contains_intolerances
 from src.recipe_info_util import clean_summary
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
@@ -147,12 +147,35 @@ def search():
     return render_template('display_results.html', query=query, results=results, form=form)
 
 
+@views.route("/favorite/recipe/<recipe_id>", methods=['GET', 'POST'])
+def favorite_recipe(recipe_id):
+
+    username = current_user.username
+
+    user_favorites_info = favorites_db.find_one({"username": username})
+    user_favorites = user_favorites_info["favorites"]
+
+    if request.method == 'POST':
+
+        title = request.form['title'].strip()
+
+        # Favorite recipe
+        if recipe_id in user_favorites:
+            del user_favorites[recipe_id]
+        else:
+            pass
+            user_favorites[recipe_id] = title
+
+        favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+
+        return 'Action Completed'
+
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
-    contains_intolerances = None
     favorite = False
 
     if current_user.is_authenticated:
+
         username = current_user.username
 
         user_favorites_info = favorites_db.find_one({"username": username})
@@ -161,27 +184,22 @@ def display_recipe(recipe_id):
         user_favorites = user_favorites_info["favorites"]
         user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        # contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
-
         # Search_History(recipe_id, current_user)
 
         if recipe_id in user_favorites:
             favorite = True
 
         if request.method == 'POST':
+            recipe_data = request.get_json()
+            ingredients = recipe_data['ingredients']
+            dairy_free = recipe_data['dairyFree']
+            gluten_free = recipe_data["glutenFree"]
 
-            # Favorite recipe
-            if recipe_id in user_favorites:
-                del user_favorites[recipe_id]
-            else:
-                pass
-                # user_favorites[recipe_id] = title
+            intolerances = contains_intolerances(ingredients, dairy_free, gluten_free, user_intolerances)
 
-            favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+            return jsonify(intolerances)
 
-            return 'Action Completed'
-
-    return render_template('display_recipe.html', recipe=None)
+    return render_template('display_recipe.html', recipe_id=recipe_id, favorite=favorite)
 
 
 @views.route("/retrieve-recipe/<recipe_id>", methods=['GET', 'POST'])
@@ -195,6 +213,8 @@ def retrieve_recipe(recipe_id):
         "ingredients": recipe.get_ingredients(),
         "instructions": recipe.get_instructions_list(),
         "time": recipe.get_prep_time(),
+        "dairyFree": recipe.recipe_info["dairyFree"],
+        "glutenFree": recipe.recipe_info["glutenFree"]
     }
 
     contains_intolerances = None

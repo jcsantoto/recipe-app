@@ -4,15 +4,16 @@ $(document).ready(function() {
     const recipeId = parseInt(window.location.pathname.split('/').pop(), 10);
     const cachedRecipeData = localStorage.getItem(`cachedRecipeData_${recipeId}`);
 
-    console.log(recipeId);
-
-
     // If cached data is available
     if (cachedRecipeData) {
 
         // Parse it and display the recipe information
         displayRecipe(JSON.parse(cachedRecipeData));
-        console.log("Displaying cached data");
+
+        if (isUserAuthenticated){
+            sendRecipeData(cachedRecipeData, recipeId);
+        }
+
     }
 
     // If no cached data or the data has expired
@@ -21,7 +22,12 @@ $(document).ready(function() {
         fetchRecipeData(recipeId)
             .done(recipe => {
                 localStorage.setItem(`cachedRecipeData_${recipeId}`, JSON.stringify(recipe));
-                displayRecipe(recipe);
+                displayRecipe(recipe)
+
+                if (isUserAuthenticated){
+                    sendRecipeData(cachedRecipeData, recipeId);
+                }
+
             });
     }
 
@@ -82,8 +88,41 @@ function displayRecipe(recipe) {
 
 // Function to fetch recipe data from the API using jQuery
 function fetchRecipeData(recipeId) {
-    console.log("Retrieving from database");
     return $.getJSON(`/retrieve-recipe/${recipeId}`);
+}
+
+
+function sendRecipeData(recipe, recipeId){
+
+    data = JSON.parse(recipe)
+
+    $.ajax({
+            url: '/recipe/' + recipeId, // Replace with your server-side route URL
+            method: 'POST',
+            data: JSON.stringify({ingredients: data.ingredients,
+                   dairyFree: data.dairyFree,
+                   glutenFree: data.glutenFree
+                   }),
+            contentType: 'application/json',
+            success: function (response) {
+
+                const recipeIntolDiv = $('#recipe-intolerances');
+
+                response.forEach(intolerance=> {
+                    recipeIntolDiv.append(`<span> Warning: The following recipe may contain ${intolerance} which
+                    you have specified as an allergen <br> </span>`)
+                });
+
+
+
+            },
+            error: function (error) {
+                console.log(error);
+
+
+            },
+        });
+
 }
 
 

@@ -4,6 +4,11 @@
 
 <script src="{{url_for('static', filename='/js/cache_recipe.js')}}"></script>
 
+<script>
+        const isUserAuthenticated = {{ current_user.is_authenticated|lower }};
+</script>
+
+
 <div class="row" style = "margin-left: 1%; margin-right: 1%;">
 
     <div class = "row border-bottom border-2">
@@ -33,7 +38,7 @@
 </div>
 
 <div id = "recipe-title" class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%;">
-    <h3> {{ recipe['title'] }} </h3>
+
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-top: 1%">
@@ -41,48 +46,31 @@
 </div>
 
 <div id = "recipe-summary" class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%; margin-top: 0.5%;">
-    <p> {{ summary|safe }} </p>
+
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-top: 1%;">
     <h2> Ingredients </h2>
 </div>
 
-{% if contains_intolerances %}
-    <div style = "background-color: yellow;">
-        {% for intolerance in contains_intolerances %}
-        <span>
-            Warning: The following recipe may contain {{ intolerance.name }} which you have specified as an allergen <br>
-        </span>
-        {% endfor %}
-    </div>
-{% endif %}
+
+<div id = "recipe-intolerances" style = "background-color: yellow;">
+
+</div>
+
 
 <div id = "recipe-ingredients" class = "row border-bottom border-2" style = "margin-left: 2%; margin-right: 1%; margin-top: 0.5%;">
-    <ul style="list-style-type:square;">
-    {% for ingr in recipe['ingredients'] %}
-        <li>
-        {{ ingr["amount"] }}
-        {{ ingr["unit"] }}
-        {{ ingr["name"] }}
-        </li>
-    {% endfor %}
-        </ul>
+
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-bottom: 0.5%; margin-top: 1%;">
     <h2> Instructions </h2>
 </div>
+
 <div id = "recipe-instructions" class = "border-bottom border-2" style = "margin-left: 1%;">
-    {% for instr in instructions %}
-<div class = "row" style = "margin-left: 1%; margin-right: 1%;">
-    <p>
-        <b> Step {{ instr["number"] }} </b>
-        <br>
-        <div style="margin-top: 1px;"> {{ instr["step"] }} </div>
-    </p>
+
 </div>
-    {% endfor %}
+
 </div>
 
 

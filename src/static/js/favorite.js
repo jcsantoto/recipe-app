@@ -1,20 +1,21 @@
 $(document).ready(function() {
   $(".favorite-btn").click(function() {
     var recipeId = $(this).data("recipe-id");
+    var recipeTitle = $("#recipe-title").children("h3").text();
+
+    console.log(recipeTitle)
+
     var button = $(this);
     var buttonText = button.text().trim()
 
     // AJAX request
     $.ajax({
       type: "POST",
-      url: "/recipe/" + recipeId,
-      data: { /* Additional data if needed */ },
+      url: "/favorite/recipe/" + recipeId,
+      data: {title: recipeTitle},
       success: function(response) {
 
         // Handle the response from the Flask backend
-
-        console.log(buttonText === "Favorite")
-        console.log(buttonText === "Unfavorite")
 
 
         if (buttonText === "Favorite"){
