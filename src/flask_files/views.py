@@ -1,6 +1,6 @@
-from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
+from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response, jsonify
 from flask_login import current_user, login_required
-import pdfkit
+import pdfkit, json
 
 import src.search as recipe_search
 from src.flask_files import forms
@@ -149,12 +149,6 @@ def search():
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
-    recipe_info = Recipe(recipe_id)
-    title = recipe_info.get_title()
-    summary = clean_summary(recipe_info.get_summary())
-    ingredients = recipe_info.get_ingredients()
-    instructions = recipe_info.get_instructions_list()
-    time = recipe_info.get_prep_time()
     contains_intolerances = None
     favorite = False
 
@@ -167,9 +161,9 @@ def display_recipe(recipe_id):
         user_favorites = user_favorites_info["favorites"]
         user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
+        # contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
 
-        Search_History(recipe_id, current_user)
+        # Search_History(recipe_id, current_user)
 
         if recipe_id in user_favorites:
             favorite = True
@@ -180,20 +174,47 @@ def display_recipe(recipe_id):
             if recipe_id in user_favorites:
                 del user_favorites[recipe_id]
             else:
-                user_favorites[recipe_id] = title
+                pass
+                # user_favorites[recipe_id] = title
 
             favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
 
             return 'Action Completed'
 
-    session["title"] = title
-    session["ingredients"] = ingredients
-    session["instructions"] = instructions
-    session["time"] = time
+    return render_template('display_recipe.html', recipe=None)
 
-    return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
-                           current_user=current_user, recipe_id=recipe_id)
+
+@views.route("/retrieve-recipe/<recipe_id>", methods=['GET', 'POST'])
+def retrieve_recipe(recipe_id):
+
+    recipe = Recipe(recipe_id)
+
+    recipe_info = {
+        "title": recipe.get_title(),
+        "summary": clean_summary(recipe.get_summary()),
+        "ingredients": recipe.get_ingredients(),
+        "instructions": recipe.get_instructions_list(),
+        "time": recipe.get_prep_time(),
+    }
+
+    contains_intolerances = None
+    favorite = False
+
+    session["title"] = recipe_info['title']
+    session["ingredients"] = recipe_info['ingredients']
+    session["instructions"] = recipe_info['instructions']
+    session["time"] = recipe_info['time']
+
+    response_data = jsonify(recipe_info)
+    response = make_response(response_data)
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+
+    # Handle conditional requests
+    if_none_match = request.headers.get('If-None-Match')
+    if if_none_match and if_none_match == response.headers.get('ETag'):
+        return '', 304  # Respond with 304 Not Modified if the data is still fresh
+
+    return response
 
 
 @views.route("/pdf")
