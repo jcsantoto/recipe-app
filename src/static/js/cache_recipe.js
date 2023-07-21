@@ -45,25 +45,37 @@ function displayRecipe(recipe) {
     recipeTitleDiv.append(`<h3> ${recipe.title} </h3>`);
     recipeSummaryDiv.append(`<p> ${recipe.summary} </p>`)
 
-    const ingredientUL = $("<ul>").attr({
-        style: "list-style-type:square; line-height: 0px;"
-    })
+    let ingredientHTML = `<ul style="list-style-type:square;">`
 
     recipe.ingredients.forEach(ingredient => {
-
-        ingredientUL.append($("<p>").append($("<ul>").append(`${ingredient.amount}`)))
+        ingredientHTML += `
+        <li>
+            ${ingredient.amount}
+            ${ingredient.unit}
+            ${ingredient.name}
+        </li>`
     });
 
+    ingredientHTML += `</ul>`
+    recipeIngredientsDiv.append(ingredientHTML)
 
 
-    recipeIngredientsDiv.append(ingredientUL)
+    let instructionHTML = ``
 
+    recipe.instructions.forEach(step => {
+        instructionHTML += `
 
+            <b>Step ${step.number}</b>
+            <br>
 
+            <div style="margin-top: 1px;">
+                <p>
+                    ${step.step}
+                </p>
+            </div>`
+    });
 
-
-    console.log(recipe.title);
-
+    recipeInstructionsDiv.append(instructionHTML)
 
 
 }

@@ -59,23 +59,21 @@
 {% endif %}
 
 <div id = "recipe-ingredients" class = "row border-bottom border-2" style = "margin-left: 2%; margin-right: 1%; margin-top: 0.5%;">
+    <ul style="list-style-type:square;">
     {% for ingr in recipe['ingredients'] %}
-        <p>
-        <ul style="list-style-type:square; line-height: 0px;">
         <li>
         {{ ingr["amount"] }}
         {{ ingr["unit"] }}
         {{ ingr["name"] }}
         </li>
-        </ul>
-        </p>
     {% endfor %}
+        </ul>
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-bottom: 0.5%; margin-top: 1%;">
     <h2> Instructions </h2>
 </div>
-<div id = "recipe-instructions" class = "border-bottom border-2">
+<div id = "recipe-instructions" class = "border-bottom border-2" style = "margin-left: 1%;">
     {% for instr in instructions %}
 <div class = "row" style = "margin-left: 1%; margin-right: 1%;">
     <p>
