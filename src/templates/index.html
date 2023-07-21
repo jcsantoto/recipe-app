@@ -8,6 +8,7 @@
 
             <h1> Welcome to foodcraft </h1>
 
+            <div style="background-image: url({{url_for('static', filename='/images/background.png')}}); background-position: center; background-size: cover;">
                 <form class = "form-inline ms-auto" style = "margin-left: auto; margin-right: auto; margin-top: 1%; width: 75%;" action = "{{ url_for('views.search') }}" method="GET">
 
                     <div class = "btn-group toggle" role = "group" aria-label = "Radio toggle button group" style = "margin-left: auto; margin-right: auto; margin-top: 20%; width:50%;">
@@ -18,10 +19,11 @@
                         <label class = "btn btn-outline-success" for = "toggle-by-ingredient">Search by ingredients</label>
                     </div>
                     <div class = "m-3">
-                        {{ form.query(id="toggle-search-bar", class="form-control form-control-lg search-bar") }}
-                        {{ form.submit() }}
+                        {{ form.query(id="toggle-search-bar", class="form-control form-control-lg search-bar", style="background-color:rgba(255,255,255,0.75)") }}
+                        {{ form.submit(class="m-3") }}
                     </div>
                 </form>
+            </div>
 
         </div>
 
@@ -40,7 +42,7 @@
                     <div  class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
 
                         <div style = "margin-left: 15%; margin-right: 15%;">
-                            <a style = "no-style" href = "/recipes/{{ item['id'] }}">
+                            <a style = "no-style" href = "/recipe/{{ item['id'] }}">
 
                                     <img class = "img-fluid w-100" src = "{{ item['image'] }}" style = "margin-left: auto; margin-right: auto;">
                                     <div class = "carousel-caption" style = "background-color: rgba(0,0,0,0.5);">
