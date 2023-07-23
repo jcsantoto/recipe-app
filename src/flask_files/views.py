@@ -1,6 +1,8 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
 from flask_login import current_user, login_required
 import pdfkit
+import random
+import time
 
 import src.search as recipe_search
 from src.flask_files import forms
@@ -8,6 +10,7 @@ from src.flask_files.database import mongo
 from src import api_options as Options
 from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
+from src.recipe_recommend import get_similar_recipe
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -16,12 +19,67 @@ db = client["recipeapp"]
 accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
+recommendation_db = db["recommendation"]
 search_history = db["SearchHistory"]
+
 
 
 @views.route("/", methods=['GET'])
 def home_page():
     form = forms.SearchForm()
+
+    if current_user.is_authenticated:
+
+        favorites = current_user.favorites['favorites']
+
+        recommendations = current_user.load_recommendations()
+
+        # If recommendation already exists
+        if recommendations:
+
+            # Check timestamp of when recommendation was given
+            last_recommended_timestamp = recommendations["timestamp"]
+
+            current_timestamp = time.time()
+
+            elapsed_time = current_timestamp - last_recommended_timestamp
+
+            # If recommendation is more than 2 hours old, generate new recommendation
+            if elapsed_time >= 7200:
+
+                basis, recommended_recipes = generate_recommendations()
+
+                # update recommendation in database
+                recommendation_db.update_one({"username": current_user.username},
+                                             {"$set":{
+                                                 "username": current_user.username,
+                                                 "timestamp": time.time(),
+                                                 "recipes": recommended_recipes,
+                                                 "basis": basis
+                                             }})
+
+            # If not, display stored recommendation
+            else:
+                basis = recommendations['basis']
+                recommended_recipes = recommendations['recipes']
+
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
+
+        # If recommendation doesn't exist, and if user has favorites,
+        elif favorites:
+
+            # generate new recommendation
+            basis, recommended_recipes = generate_recommendations()
+
+            # put recommendation in database with timestamp
+            recommendation_db.insert_one({
+                "username": current_user.username,
+                "timestamp": time.time(),
+                "recipes": recommended_recipes,
+                "basis": basis
+            })
+
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
 
     return render_template("index.html", form=form)
 
@@ -148,7 +206,7 @@ def display_recipe(recipe_id):
     summary = clean_summary(recipe_info.get_summary())
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
-    time = recipe_info.get_prep_time()
+    prep_time = recipe_info.get_prep_time()
     contains_intolerances = None
     favorite = False
 
@@ -183,7 +241,7 @@ def display_recipe(recipe_id):
     session["title"] = title
     session["ingredients"] = ingredients
     session["instructions"] = instructions
-    session["time"] = time
+    session["time"] = prep_time
 
     return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
                            instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
@@ -217,6 +275,30 @@ def _parse_nutrition_filter(filters, nutrition_form):
         if min_val or max_val:
             filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}
 
+            
+def generate_recommendations():
+    favorites = current_user.favorites['favorites']
+
+    if favorites:
+        recipe_name = random.choice(list(favorites.values()))
+
+        extracted_recipes = []
+
+        similar_recipes = get_similar_recipe(recipe_name)
+
+        for item in similar_recipes:
+
+            if item['title'] == recipe_name:
+                continue
+
+            extracted_recipes.append({
+                "title": item['title'],
+                "id": item['id'],
+                "image": item['image']
+
+            })
+
+    return recipe_name, extracted_recipes
 
 def add_to_search_history(recipe_id, recipe_name):
     user_history = search_history.find_one({"username": current_user.username})
@@ -253,3 +335,4 @@ def add_to_search_history(recipe_id, recipe_name):
                             "recipe_name": recipe_name})
 
         search_history.update_one({"username": current_user.username}, {"$set": {"recipes": recipe_list}})
+
