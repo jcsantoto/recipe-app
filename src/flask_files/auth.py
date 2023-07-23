@@ -101,6 +101,51 @@ def register():
     return render_template("register.html", form=form)
 
 
+@auth.route("/password-reset", methods=['GET', 'POST'])
+def password_reset():
+    if current_user.is_authenticated:
+        return redirect("/")
+
+    form = forms.ForgotPasswordForm()
+
+    if form.validate_on_submit():
+        email = form.email.data
+
+        # password reset email
+        token = email_util.generate_token(email, 'password-reset')
+        confirmation_link = email_util.generate_confirmation_link(token, "auth.confirm_password_reset")
+        message = email_util.create_password_reset_email(email, confirmation_link)
+        email_util.send_email(message)
+
+        flash("Password reset email has been sent")
+        return redirect("/")
+
+    return render_template("password_reset.html", form=form)
+
+
+@auth.route("/password-reset/<token>", methods=['GET', 'POST'])
+def confirm_password_reset(token):
+    email = email_util.confirm_token(token, 'password-reset')
+
+    if email:
+        form = forms.NewPasswordForm()
+
+        if form.validate_on_submit():
+            # encrypts password
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            accounts_db.update_one({"email": email},
+                                   {"$set": {"password": hashed_password}})
+
+            flash("Password changed successfully")
+
+            return redirect("/login")
+
+        return render_template("new_password.html", form=form)
+
+    else:
+        return redirect("/")
+
+
 @auth.route('/confirm/<token>')
 def confirm_email(token):
     email = email_util.confirm_token(token, 'email-confirm')
@@ -146,7 +191,7 @@ def confirm_change_email(token):
 def resend_confirmation():
     # confirmation email
     token = email_util.generate_token(current_user.email, 'email-confirm')
-    confirmation_link = email_util.generate_confirmation_link(token)
+    confirmation_link = email_util.generate_confirmation_link(token, "auth.confirm_email")
     message = email_util.create_confirmation_email(current_user.email, confirmation_link)
     email_util.send_email(message)
 
