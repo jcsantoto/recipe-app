@@ -40,6 +40,13 @@ def account_favorites():
 
     return render_template('account_favorites.html', favorites=favorites)
 
+@accounts.route("/account/history", methods=['GET', 'POST'])
+@login_required
+def account_history():
+    history = current_user.load_history()["recipes"]
+
+    return render_template('account_history.html', history=history)
+
 
 @accounts.route("/account/settings", methods=['GET', 'POST'])
 @login_required
