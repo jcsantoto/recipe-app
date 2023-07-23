@@ -22,6 +22,25 @@ class SearchForm(FlaskForm):
     submit = SubmitField('Search')
 
 
+class ForgotPasswordForm(FlaskForm):
+    """
+    Class to help validate and retrieve data from the forgot password form
+    """
+
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Continue')
+
+
+class NewPasswordForm(FlaskForm):
+    """
+    Class to help validate and retrieve data from the new password form
+    """
+
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Submit')
+
+
 class RegistrationForm(FlaskForm):
     """
     Class to help validate and retrieve data from fields in the registration form
