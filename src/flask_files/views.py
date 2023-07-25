@@ -21,9 +21,9 @@ favorites_db = db["favorites"]
 S_history = db["SearchHistory"]
 user_recipes = db["user_recipes"]
 
+
 @views.route("/", methods=['GET'])
 def home_page():
-
     form = forms.SearchForm()
 
     return render_template("index.html", form=form)
@@ -39,7 +39,7 @@ def password_reset():
     return render_template("password_reset.html")
 
 
-@views.route("/community",  methods=['GET', 'POST'])
+@views.route("/community", methods=['GET', 'POST'])
 @login_required
 def community_home():
     form = forms.SearchForm()
@@ -47,7 +47,7 @@ def community_home():
     return render_template("community.html", form=form)
 
 
-@views.route("/community/search",  methods=['GET', 'POST'])
+@views.route("/community/search", methods=['GET', 'POST'])
 @login_required
 def search_user_recipe():
     query = request.args.get('query')
@@ -63,14 +63,65 @@ def search_user_recipe():
             'description': decompress_data(item['description'])
         })
 
-    return render_template("display_user_recipes.html", results=recipes)
+    return render_template("user_recipe_results.html", results=recipes)
 
 
+@views.route("/recipe/community/<recipe_id>", methods=['GET', 'POST'])
+@login_required
+def display_user_recipe(recipe_id):
+    recipe_info = UserRecipe()
+    recipe_info.load_from_database(ObjectId(recipe_id))
 
-@views.route("/submit-recipe",  methods=['GET', 'POST'])
+    title = recipe_info.title
+    summary = recipe_info.description
+    ingredients = recipe_info.ingredients
+    instructions = recipe_info.instructions
+    time = recipe_info.time
+    owner = recipe_info.owner
+    intolerances = [Options.IntoleranceOptions(x) for x in recipe_info.intolerances]
+    favorite = False
+
+    session["title"] = title
+    session["ingredients"] = ingredients
+    session["instructions"] = instructions
+    session["time"] = time
+
+    if current_user.is_authenticated:
+        username = current_user.username
+
+        user_favorites_info = favorites_db.find_one({"username": username})
+        user_preferences_info = preferences_db.find_one({"username": username})
+
+        user_favorites = user_favorites_info["favorites"]
+        user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
+
+        contains_intolerances = set(user_intolerances).intersection(intolerances)
+
+        community_recipe_id = 'community/' + recipe_id
+
+        if community_recipe_id in user_favorites:
+            favorite = True
+
+        if request.method == 'POST':
+
+            # Favorite recipe
+            if community_recipe_id in user_favorites:
+                del user_favorites[community_recipe_id]
+            else:
+                user_favorites[community_recipe_id] = title
+
+            favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+
+            return 'Action Completed'
+
+    return render_template("user_recipe_info.html", title=title, summary=summary, ingredients=ingredients,
+                           instructions=instructions, time=time, owner=owner, favorite=favorite,
+                           contains_intolerances=contains_intolerances, recipe_id=recipe_id)
+
+
+@views.route("/submit-recipe", methods=['GET', 'POST'])
 @login_required
 def submit_recipe():
-
     form = forms.UserRecipeForm()
 
     if form.validate_on_submit():
@@ -295,12 +346,13 @@ def _parse_nutrition_filter(filters, nutrition_form):
         if min_val or max_val:
             filters[Options.ApiFilterOptions(name)] = {"min": min_val, "max": max_val}
 
+
 def Search_History(recipe_id, currentuser):
     check_user = S_history.find_one({"user_name": currentuser.username})
 
     if check_user == None:
 
-        S_history.insert_one({"user_name": currentuser.username,"recipe_id": [recipe_id]})
+        S_history.insert_one({"user_name": currentuser.username, "recipe_id": [recipe_id]})
 
     elif recipe_id in check_user["recipe_id"]:
         recipe_list = check_user["recipe_id"]
@@ -310,7 +362,7 @@ def Search_History(recipe_id, currentuser):
     elif len(check_user["recipe_id"]) == 15:
         recipe_list = check_user["recipe_id"]
         recipe_list.pop(14)
-        recipe_list.insert(0,recipe_id)
+        recipe_list.insert(0, recipe_id)
         S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
 
 
@@ -319,14 +371,5 @@ def Search_History(recipe_id, currentuser):
         recipe_list = check_user["recipe_id"]
         recipe_list.insert(0, recipe_id)
         S_history.update_one({"user_name": currentuser.username}, {"$set": {"recipe_id": recipe_list}})
-
-
-
-
-
-
-
-
-
 
     return "complete"

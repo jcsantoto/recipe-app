@@ -71,10 +71,10 @@ class UserRecipe:
         self.title = recipe['title']
         self.description = decompress_data(recipe['description'])
         self.time = recipe['time']
-        self.ingredients = decompress_object(recipe['ingredients'])
+        self.ingredients = recipe['ingredients']
         self.instructions = decompress_object(recipe['instructions'])
-        self.intolerances = decompress_object(recipe['intolerances'])
-        self.diets = decompress_object(recipe['diets'])
+        self.intolerances = recipe['intolerances']
+        self.diets = recipe['diets']
         self.owner = recipe['owner']
 
 
