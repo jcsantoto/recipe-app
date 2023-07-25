@@ -1,4 +1,4 @@
-const targetItem = $('#toggle-search-bar');
+ const targetItem = $('#toggle-search-bar');
 
 $('#toggle-by-name, #toggle-by-ingredient').on('change', changeState);
 

@@ -13,10 +13,16 @@ class Recipe:
     It contains methods to retrieve information about a recipe.
     """
 
-    def __init__(self, recipe_id: int):
-        self.id = recipe_id
-        url = SEARCH_URL.replace("{id}", str(self.id)) + APIKEY
-        self.recipe_info = requests.get(url).json()
+    def __init__(self, recipe_id: int = None, response: dict = None):
+
+        if recipe_id:
+            self.id = recipe_id
+            url = SEARCH_URL.replace("{id}", str(self.id)) + APIKEY
+            self.recipe_info = requests.get(url).json()
+
+        elif response:
+            self.id = response['id']
+            self.recipe_info = response
 
     def get_all(self):
         """

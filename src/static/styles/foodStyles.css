@@ -81,7 +81,13 @@ img {
   color: #999999;
 }
 
-.active {
+a.active {
   font-weight: bold;
 
 }
+
+a.no-style{
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
