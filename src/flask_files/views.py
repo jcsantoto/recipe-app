@@ -129,6 +129,9 @@ def search():
         # ingredient filter
         ingredients = form.ingredients.data
 
+        #Cusine Filter
+        cuisines = form.Cuisines.data
+
         # custom filter
         for field in form.custom_filters:
             name = field.label.text
@@ -155,7 +158,7 @@ def search():
 
         results = recipe_search.search(query=query, mode=mode, sort=sort, filters=filters,
                                        diets=diets, ex_ingredients=ingredients, intolerances=intolerances,
-                                       custom_filter=custom_filters)
+                                       custom_filter=custom_filters, cuisine=cuisines)
 
         return render_template('display_results.html', query=query, results=results, form=form,
                                unselected_intolerances=unselected_intolerances)
@@ -191,7 +194,7 @@ def search():
             _parse_nutrition_filter(filters, form.nutrition)
 
             results = recipe_search.search(query=query, mode=mode, filters=filters,
-                                           intolerances=form.intolerances.data)
+                                           intolerances=form.intolerances.data, cuisine=form.Cuisines.data)
 
         else:
             results = recipe_search.search(query, mode=mode)

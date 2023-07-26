@@ -1,7 +1,9 @@
 import requests
 from src.api_options import SortOptions, SearchMode, DietOptions, ApiFilterOptions, IntoleranceOptions, \
-    CustomFilterOptions
+    CustomFilterOptions, CuisineOptions
 from src.search_builder import RecipeSearch
+
+
 
 
 def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
@@ -10,6 +12,7 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
            diets: list[DietOptions] = None,
            intolerances: list[IntoleranceOptions] = None,
            ex_ingredients: str = None,
+           cuisine: dict = None,
            num_results: int = 10) -> list:
     """
     Performs an API call with the options specified in the parameters
@@ -46,6 +49,11 @@ def search(query: str, mode: SearchMode = None, sort: SortOptions = None,
     # Diet Filter
     if diets:
         recipe_search.add_diets([DietOptions(x) for x in diets])
+
+
+    # Cuisine filter
+    if cuisine:
+        recipe_search.add_cuisine([CuisineOptions(x) for x in cuisine])
 
     # Intolerances
     if intolerances:
