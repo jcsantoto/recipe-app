@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from wtforms.widgets import ListWidget, CheckboxInput
 from wtforms import validators
 from src.flask_files.extensions import bcrypt
-from src.api_options import SortOptions, DietOptions, IntoleranceOptions
+from src.api_options import SortOptions, DietOptions, IntoleranceOptions, CuisineOptions
 from src.flask_files.database import mongo
 
 client = mongo.cx
@@ -154,6 +154,7 @@ class SortAndFilterOptionsForm(FlaskForm):
     sort_options = [e.value for e in SortOptions]
     diet_option = [e.value for e in DietOptions]
     intolerance_option = [e.value for e in IntoleranceOptions]
+    cuisine_option = [e.value for e in CuisineOptions]
 
     sort = SelectField('Sort', validators=[Optional()], choices=sort_options)
     ingredients = StringField("Ingredients Filter", validators=[Optional()],
@@ -198,3 +199,8 @@ class UserRecipeForm(FlaskForm):
                                        render_kw={"placeholder": "Set intolerances"})
 
     submit = SubmitField('Submit Recipe')
+
+    Cuisines = SelectMultipleField('cuisine', validators=[Optional()], choices=cuisine_option,
+                                       render_kw={"placeholder": "Set Cuisines"})
+
+
