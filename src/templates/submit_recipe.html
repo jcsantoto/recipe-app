@@ -1,0 +1,90 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+<script src="{{url_for('static', filename='/js/additional_field.js')}}"></script>
+<script src="{{url_for('static', filename='/js/tags.js')}}"></script>
+
+<div class = "container text-center">
+
+    <h2> Create a Recipe </h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class = "row">
+            <h3> {{ form.title.label(class="form-control-label") }} </h3>
+            {{ form.title(class="form-control form-control-lg") }}
+        </div>
+
+        <div class = "row">
+            <h3> {{ form.description.label(class="form-control-label") }} </h3>
+            {{ form.description(class="form-control form-control-lg") }}
+        </div>
+
+        <div class = "row">
+            <h3> Time to Prepare (minutes) </h3>
+            {{ form.time(class="form-control form-control-lg") }}
+        </div>
+
+
+    <!-- Diet filter  -->
+        <div class = "row border-bottom border-2" style = "margin-top: 3%;">
+            <h3>Diet</h3>
+            {{ form.diet(class="form-control form-control-lg option-tag-box")  }}
+        </div>
+
+
+        <!-- Intolerance filter  -->
+        <div class = "row border-bottom border-2" style = "margin-top: 3%;">
+            <h3>Intolerance</h3>
+            {{ form.intolerances(class="form-control form-control-lg option-tag-box") }}
+        </div>
+
+
+        <div  id="ingredients-container" class = "row">
+            <h3> {{ form.ingredients.label(class="form-control-label") }} </h3>
+
+
+            <div class = "row">
+                <div class = "col">
+                {{ form.ingredients[0].ingredient.label(class="form-control-label") }}
+                {{ form.ingredients[0].ingredient(class="form-control form-control-lg") }}
+                </div>
+
+                <div class = "col">
+                {{ form.ingredients[0].amount.label(class="form-control-label") }}
+                {{ form.ingredients[0].amount(class="form-control form-control-lg") }}
+                </div>
+
+                <div class = "col">
+                {{ form.ingredients[0].unit.label(class="form-control-label") }}
+                {{ form.ingredients[0].unit(class="form-control form-control-lg") }}
+                </div>
+            </div>
+
+              <button type="button" class="add-ingredient-btn">Add Ingredient</button>
+
+
+        </div>
+
+        <div id="instructions-container" class = "row">
+            <h3>{{ form.instructions[0].step.label(class="form-control-label") }} </h3>
+
+            <div class = "row">
+                {{ form.instructions[0].step(class="form-control form-control-lg") }}
+            </div>
+
+            <button type="button" class="add-instruction-btn">Add Instruction</button>
+
+
+        </div>
+
+        <div class = "m-3">
+            {{ form.submit() }}
+        </div>
+    </form>
+
+</div>
+
+
+{% endblock %}
