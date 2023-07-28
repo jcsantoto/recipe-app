@@ -210,6 +210,8 @@ def display_recipe(recipe_id):
     ingredients = recipe_info.get_ingredients()
     instructions = recipe_info.get_instructions_list()
     prep_time = recipe_info.get_prep_time()
+    price = recipe_info.get_total_Cost()
+    macros = recipe_info.get_Macros()
     contains_intolerances = None
     favorite = False
 
@@ -248,7 +250,7 @@ def display_recipe(recipe_id):
 
     return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
                            instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
-                           current_user=current_user, recipe_id=recipe_id)
+                           current_user=current_user, recipe_id=recipe_id,price = price, macros = macros)
 
 
 @views.route("/pdf")
