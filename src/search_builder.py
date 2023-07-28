@@ -140,3 +140,10 @@ class RecipeSearch:
         :return: the parameters of the query as a dict.
         """
         return self.querystring
+
+    def add_cuisine(self, cuisine: list) -> RecipeSearch:
+
+        cuisine_str = ",".join([x.value for x in cuisine])
+        self.querystring["cuisine"] = cuisine_str
+        return self
+
