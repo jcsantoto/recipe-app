@@ -102,3 +102,32 @@ class SearchMode(Enum):
     ByName = 1
     ByIngredients = 2
 
+class CuisineOptions(Enum):
+    African = "African"
+    Asian = "Asian"
+    American = "American"
+    British = "British"
+    Cajun = "Cajun"
+    Caribbean = "Caribbean"
+    Chinese = "Chinese"
+    Eastern = "Eastern"
+    European = "European"
+    French = "French"
+    German = "German"
+    Greek = "Greek"
+    Indian = "Indian"
+    Irish = "Irish"
+    Italian = "Italian"
+    Japanese = "Japanese"
+    Jewish = "Jewish"
+    Korean = "Korean"
+    Latin = "Latin"
+    Mediterranean = "Mediterranean"
+    Mexican = "Mexican"
+    Middle = "Middle"
+    Nordic = "Nordic"
+    Southern = "Southern"
+    Spanish = "Spanish"
+    Thai = "Thai"
+    Vietnamese = "Vietnamese"
+
