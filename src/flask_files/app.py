@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask
 from src.flask_files import database, extensions
 from src.flask_files.config import Config
+from src.flask_files.redis_util import redis_client
 
 
 def create_app():
@@ -11,12 +12,13 @@ def create_app():
 
     database.init_app(app)
 
+    redis_client.init_redis_client()
+
     app.config["SECRET_KEY"] = SECRET_KEY
     app.config["MONGO_URI"] = URI
 
     extensions.bcrypt.init_app(app)
     extensions.login_manager.init_app(app)
-    extensions.cache.init_app(app)
 
     from src.flask_files.auth import auth as auth_blueprint
     from src.flask_files.views import views as views_blueprint

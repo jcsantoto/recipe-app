@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response
+from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response, jsonify
 from flask_login import current_user, login_required
 import pdfkit
 from bson.objectid import ObjectId
@@ -6,6 +6,7 @@ import random
 import time
 
 import src.search as recipe_search
+import src.trending_recipe as trending_recipe_util
 from src.flask_files import forms
 from src.flask_files.database import mongo
 from src import api_options as Options
@@ -13,6 +14,7 @@ from src.recipe_info import Recipe
 from src.recipe_info_util import clean_summary
 from src.user_recipes import UserRecipe, decompress_data
 from src.recipe_recommend import get_similar_recipe
+
 
 views = Blueprint('views', __name__, template_folder="../templates", static_folder="../static")
 
@@ -29,6 +31,10 @@ search_history = db["SearchHistory"]
 @views.route("/", methods=['GET'])
 def home_page():
     form = forms.SearchForm()
+
+    trending_recipes = trending_recipe_util.get_trending_recipes()
+
+    print(trending_recipes)
 
     if current_user.is_authenticated:
 
@@ -65,7 +71,8 @@ def home_page():
                 basis = recommendations['basis']
                 recommended_recipes = recommendations['recipes']
 
-            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes,
+                                   trending_recipes=trending_recipes)
 
         # If recommendation doesn't exist, and if user has favorites,
         elif favorites:
@@ -81,9 +88,10 @@ def home_page():
                 "basis": basis
             })
 
-            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes)
+            return render_template("index.html", form=form, original_name=basis, recommendation=recommended_recipes,
+                                   trending_recipes=trending_recipes)
 
-    return render_template("index.html", form=form)
+    return render_template("index.html", form=form, trending_recipes=trending_recipes)
 
 
 @views.route("/about")
@@ -330,8 +338,15 @@ def search():
     return render_template('display_results.html', query=query, results=results, form=form)
 
 
+@views.route("/trending")
+def trending():
+    data = trending_recipe_util.get_trending_recipes()
+
+    return jsonify(data)
+
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
+
     recipe_info = Recipe(recipe_id)
     title = recipe_info.get_title()
     summary = clean_summary(recipe_info.get_summary())
@@ -342,6 +357,8 @@ def display_recipe(recipe_id):
     macros = recipe_info.get_Macros()
     contains_intolerances = None
     favorite = False
+
+    trending_recipe_util.increment_view_count(recipe_id, title)
 
     if current_user.is_authenticated:
         username = current_user.username
@@ -434,7 +451,7 @@ def generate_recommendations():
 
     return recipe_name, extracted_recipes
 
-  
+
 def add_to_search_history(recipe_id, recipe_name):
     user_history = search_history.find_one({"username": current_user.username})
 
