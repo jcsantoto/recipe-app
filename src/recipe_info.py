@@ -5,6 +5,8 @@ import src.recipe_info_util as util
 APIKEY = "?apiKey=b9f570c04c8a44229ffd38618ddfabe2"
 
 SEARCH_URL = "https://api.spoonacular.com/recipes/{id}/information"
+SEARCH_URL2 = "https://api.spoonacular.com/recipes/{id}/priceBreakdownWidget.json"
+SEARCH_URL3 ="https://api.spoonacular.com/recipes/{id}/nutritionWidget.json"
 
 
 class Recipe:
@@ -13,10 +15,24 @@ class Recipe:
     It contains methods to retrieve information about a recipe.
     """
 
-    def __init__(self, recipe_id: int):
-        self.id = recipe_id
-        url = SEARCH_URL.replace("{id}", str(self.id)) + APIKEY
-        self.recipe_info = requests.get(url).json()
+    def __init__(self, recipe_id: int = None, response: dict = None):
+
+        if recipe_id:
+            self.id = recipe_id
+            url = SEARCH_URL.replace("{id}", str(self.id)) + APIKEY
+            self.recipe_info = requests.get(url).json()
+
+            url2 = SEARCH_URL2.replace("{id}", str(self.id)) + APIKEY
+            self.priceBreakDown = requests.get(url2).json()
+
+            url3 = SEARCH_URL3.replace("{id}", str(self.id)) + APIKEY
+            self.macros = requests.get(url3).json()
+
+        elif response:
+            self.id = response['id']
+            self.recipe_info = response
+            self.priceBreakDown = response
+            self.macros = response
 
     def get_all(self):
         """
@@ -38,6 +54,17 @@ class Recipe:
         :return: Returns recipe price
         """
         return self.recipe_info['pricePerServing'] / 100
+
+    def get_total_Cost(self) -> str:
+
+        rounded = round((self.priceBreakDown['totalCost'] /100) ,2)
+
+
+        return "$"+ str(rounded)
+
+    def get_Macros(self) -> str:
+
+        return self.macros['nutrients']
 
     def get_prep_time(self) -> str:
         """
