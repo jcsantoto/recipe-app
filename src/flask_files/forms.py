@@ -13,6 +13,7 @@ client = mongo.cx
 db = client["recipeapp"]
 accounts_db = db["accounts"]
 
+
 class SearchForm(FlaskForm):
     """
     Class to help validate and retrieve data from fields in the search bar.
@@ -58,7 +59,6 @@ class RegistrationForm(FlaskForm):
     def validate_email(self, email):
         if accounts_db.find_one({"email": email.data}):
             raise ValidationError("An account with this email is already registered.")
-
 
 
 class LoginForm(FlaskForm):
@@ -168,6 +168,9 @@ class SortAndFilterOptionsForm(FlaskForm):
 
     nutrition = FieldList(FormField(Range), min_entries=4, max_entries=4)
 
+    Cuisines = SelectMultipleField('cuisine', validators=[Optional()], choices=cuisine_option,
+                                   render_kw={"placeholder": "Set Cuisines"})
+
     apply = SubmitField('Apply')
 
 
@@ -182,15 +185,14 @@ class InstructionForm(FlaskForm):
 
 
 class UserRecipeForm(FlaskForm):
-
     diet_option = [e.value for e in DietOptions]
     intolerance_option = [e.value for e in IntoleranceOptions]
 
-    title = StringField('Title', validators=[Optional()] )
-    description = TextAreaField('Description' , validators=[Optional()])
-    time = IntegerField("Time" , validators=[Optional()])
-    ingredients = FieldList(FormField(IngredientForm), min_entries=1 , validators=[Optional()])
-    instructions = FieldList(FormField(InstructionForm), min_entries=1 , validators=[Optional()])
+    title = StringField('Title', validators=[Optional()])
+    description = TextAreaField('Description', validators=[Optional()])
+    time = IntegerField("Time", validators=[Optional()])
+    ingredients = FieldList(FormField(IngredientForm), min_entries=1, validators=[Optional()])
+    instructions = FieldList(FormField(InstructionForm), min_entries=1, validators=[Optional()])
 
     diet = SelectMultipleField('Diet', validators=[Optional()], choices=diet_option,
                                render_kw={"placeholder": "Choose a diet"})
@@ -199,8 +201,3 @@ class UserRecipeForm(FlaskForm):
                                        render_kw={"placeholder": "Set intolerances"})
 
     submit = SubmitField('Submit Recipe')
-
-    Cuisines = SelectMultipleField('cuisine', validators=[Optional()], choices=cuisine_option,
-                                       render_kw={"placeholder": "Set Cuisines"})
-
-

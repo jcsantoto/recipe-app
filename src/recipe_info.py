@@ -58,8 +58,6 @@ class Recipe:
     def get_total_Cost(self) -> str:
 
         rounded = round((self.priceBreakDown['totalCost'] /100) ,2)
-
-
         return "$"+ str(rounded)
 
     def get_Macros(self) -> str:

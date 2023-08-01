@@ -9,10 +9,8 @@ $(document).ready(function() {
 
         // Parse it and display the recipe information
         displayRecipe(JSON.parse(cachedRecipeData));
+        sendRecipeData(cachedRecipeData, recipeId);
 
-        if (isUserAuthenticated){
-            sendRecipeData(cachedRecipeData, recipeId);
-        }
 
     }
 
@@ -23,10 +21,8 @@ $(document).ready(function() {
             .done(recipe => {
                 localStorage.setItem(`cachedRecipeData_${recipeId}`, JSON.stringify(recipe));
                 displayRecipe(recipe)
+                sendRecipeData(cachedRecipeData, recipeId);
 
-                if (isUserAuthenticated){
-                    sendRecipeData(cachedRecipeData, recipeId);
-                }
 
             });
     }
@@ -41,15 +37,20 @@ function displayRecipe(recipe) {
     const recipeSummaryDiv = $('#recipe-summary');
     const recipeIngredientsDiv = $('#recipe-ingredients');
     const recipeInstructionsDiv = $('#recipe-instructions');
+    const recipePriceDiv = $('#recipe-price');
+    const recipeNutrientDiv = $('#recipe-nutrients');
 
     // Clear any existing content
     recipeTitleDiv.empty();
     recipeSummaryDiv.empty();
     recipeIngredientsDiv.empty();
     recipeInstructionsDiv.empty();
+    recipePriceDiv.empty()
+    recipeNutrientDiv.empty()
 
     recipeTitleDiv.append(`<h3> ${recipe.title} </h3>`);
     recipeSummaryDiv.append(`<p> ${recipe.summary} </p>`)
+    recipePriceDiv.append(`<p> ${recipe.price} </p>`)
 
     let ingredientHTML = `<ul style="list-style-type:square;">`
 
@@ -64,6 +65,27 @@ function displayRecipe(recipe) {
 
     ingredientHTML += `</ul>`
     recipeIngredientsDiv.append(ingredientHTML)
+
+
+    let nutrientHTML = `
+    <table>
+        <tr>
+            <th> Nutrient </th>
+            <th> Amount </th>
+            <th> % Daily Value </th>
+        </tr>`
+
+
+    recipe.macros.forEach(macro => {
+        nutrientHTML += `
+        <tr>
+            <td> ${macro.name} </td>
+            <td> ${macro.amount} </td>
+            <td> ${macro.percentOfDailyNeeds} </td>
+        </tr>`
+    });
+    nutrientHTML += `</table>`
+    recipeNutrientDiv.append(nutrientHTML)
 
 
     let instructionHTML = ``
@@ -96,13 +118,21 @@ function sendRecipeData(recipe, recipeId){
 
     data = JSON.parse(recipe)
 
+    if (isUserAuthenticated){
+        post_data = JSON.stringify({ingredients: data.ingredients,
+                       dairyFree: data.dairyFree,
+                       glutenFree: data.glutenFree,
+                       title: data.title
+                       })
+    }
+    else{
+        post_data = JSON.stringify({title: data.title})
+    }
+
     $.ajax({
             url: '/recipe/' + recipeId, // Replace with your server-side route URL
             method: 'POST',
-            data: JSON.stringify({ingredients: data.ingredients,
-                   dairyFree: data.dairyFree,
-                   glutenFree: data.glutenFree
-                   }),
+            data: post_data,
             contentType: 'application/json',
             success: function (response) {
 

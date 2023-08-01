@@ -29,13 +29,15 @@ recommendation_db = db["recommendation"]
 search_history = db["SearchHistory"]
 
 
+@views.route("/clear", methods=['GET'])
+def clear():
+    trending_recipe_util.clear_cache()
+
 @views.route("/", methods=['GET'])
 def home_page():
     form = forms.SearchForm()
 
     trending_recipes = trending_recipe_util.get_trending_recipes()
-
-    print(trending_recipes)
 
     if current_user.is_authenticated:
 
@@ -142,15 +144,16 @@ def display_user_recipe(recipe_id):
     summary = recipe_info.description
     ingredients = recipe_info.ingredients
     instructions = recipe_info.instructions
-    time = recipe_info.time
+    prep_time = recipe_info.time
     owner = recipe_info.owner
     intolerances = [Options.IntoleranceOptions(x) for x in recipe_info.intolerances]
     favorite = False
+    matching_intolerances = None
 
     session["title"] = title
     session["ingredients"] = ingredients
     session["instructions"] = instructions
-    session["time"] = time
+    session["time"] = prep_time
 
     if current_user.is_authenticated:
         username = current_user.username
@@ -161,7 +164,7 @@ def display_user_recipe(recipe_id):
         user_favorites = user_favorites_info["favorites"]
         user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        contains_intolerances = set(user_intolerances).intersection(intolerances)
+        matching_intolerances = set(user_intolerances).intersection(intolerances)
 
         community_recipe_id = 'community/' + recipe_id
 
@@ -181,8 +184,8 @@ def display_user_recipe(recipe_id):
             return 'Action Completed'
 
     return render_template("user_recipe_info.html", title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions, time=time, owner=owner, favorite=favorite,
-                           contains_intolerances=contains_intolerances, recipe_id=recipe_id)
+                           instructions=instructions, time=prep_time, owner=owner, favorite=favorite,
+                           contains_intolerances=matching_intolerances, recipe_id=recipe_id)
 
 
 @views.route("/submit-recipe", methods=['GET', 'POST'])
@@ -193,7 +196,7 @@ def submit_recipe():
     if form.validate_on_submit():
         title = form.title.data
         description = form.description.data
-        time = form.time.data
+        prep_time = form.time.data
         ingredients = form.ingredients.data
         instructions = form.instructions.data
         diet = form.diet.data
@@ -209,7 +212,7 @@ def submit_recipe():
 
         recipe.set_title(title)
         recipe.set_description(description)
-        recipe.set_time(time)
+        recipe.set_time(prep_time)
         recipe.set_diets(diet)
         recipe.set_intolerances(intolerances)
         recipe.set_ingredients(ingredients)
@@ -266,7 +269,7 @@ def search():
         # ingredient filter
         ingredients = form.ingredients.data
 
-        #Cusine Filter
+        # cuisine Filter
         cuisines = form.Cuisines.data
 
         # custom filter
@@ -365,28 +368,29 @@ def favorite_recipe(recipe_id):
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
-    contains_intolerances = None
     favorite = False
+    title = None
 
-    trending_recipe_util.increment_view_count(recipe_id, title)
+    if request.method == 'POST':
 
-    if current_user.is_authenticated:
+        recipe_data = request.get_json()
+        title = recipe_data['title']
+        trending_recipe_util.increment_view_count(recipe_id, title)
 
-        username = current_user.username
+        if current_user.is_authenticated:
+            username = current_user.username
 
-        user_favorites_info = favorites_db.find_one({"username": username})
-        user_preferences_info = preferences_db.find_one({"username": username})
+            user_favorites_info = favorites_db.find_one({"username": username})
+            user_preferences_info = preferences_db.find_one({"username": username})
 
-        user_favorites = user_favorites_info["favorites"]
-        user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
+            user_favorites = user_favorites_info["favorites"]
+            user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        add_to_search_history(recipe_id, title)
+            add_to_search_history(recipe_id, title)
 
-        if recipe_id in user_favorites:
-            favorite = True
+            if recipe_id in user_favorites:
+                favorite = True
 
-        if request.method == 'POST':
-            recipe_data = request.get_json()
             ingredients = recipe_data['ingredients']
             dairy_free = recipe_data['dairyFree']
             gluten_free = recipe_data["glutenFree"]
@@ -437,9 +441,9 @@ def shopping_list():
     title = session["title"]
     ingredients = session["ingredients"]
     instructions = session["instructions"]
-    time = session["time"]
+    prep_time = session["time"]
 
-    rendered = render_template("shopping_list.html", title=title, time=time, ingredients=ingredients,
+    rendered = render_template("shopping_list.html", title=title, time=prep_time, ingredients=ingredients,
                                instructions=instructions)
 
     pdf = pdfkit.from_string(rendered, False)

@@ -53,25 +53,16 @@
     <h2> Price</h2>
 </div>
 
-<div class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%; margin-top: 0.5%;">
-    <p> {{ price |safe }} </p>
+<div id = "recipe-price" class = "row border-bottom border-2" style = "margin-left: 1%; margin-right: 1%; margin-top: 0.5%;">
+
 </div>
 
 <div class = "row" style = "margin-left: 1%; margin-right: 1%; margin-top: 1%">
     <h2> Nutrients </h2>
 </div>
-<div class = "row border-bottom border-2" style = "margin-left: 2%; margin-right: 1%; margin-top: 0.5%;">
-    {% for mac in macros %}
-        <p>
-        <ul style="list-style-type:square; line-height: 0px;">
-        <li>
-        {{ mac["name"] }}
-        {{ mac["amount"] }}
-        {{ mac["[percentOfDailyNeeds"] }}
-        </li>
-        </ul>
-        </p>
-    {% endfor %}
+
+<div id = "recipe-nutrients" class = "row border-bottom border-2" style = "margin-left: 2%; margin-right: 1%; margin-top: 0.5%;">
+
 </div>
 
 
