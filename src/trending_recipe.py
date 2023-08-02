@@ -16,13 +16,12 @@ def get_trending_recipes():
     results = []
 
     for data in trending_recipes_data:
+
         results.append({
             'id': data[0].decode(),
             'views': data[1],
             'title': client.get(data[0]).decode()
         })
-
-    print("TEST")
 
     return results
 

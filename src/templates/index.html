@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <div class = "container text-center">
+    <div class = "container text-center" style = "margin-bottom: 5%">
 
         <div class = "row" >
 
@@ -40,6 +40,7 @@
 
 
 <!--   Carousel     -->
+        {% if recommendation %}
         <div class = "card" style = "margin-left: 30%; margin-right: 30%; margin-top: 15%">
 
             <div class = "m-3">
@@ -87,11 +88,13 @@
             </div>
 
         </div>
+        {% endif %}
 <!-- End Carousel -->
 
 
 
 <!--   Carousel     -->
+        {% if trending_recipes %}
         <div class = "card" style = "margin-left: 30%; margin-right: 30%; margin-top: 15%">
 
             <div class = "m-3">
@@ -139,6 +142,7 @@
             </div>
 
         </div>
+        {% endif %}
 <!-- End Carousel -->
 
 

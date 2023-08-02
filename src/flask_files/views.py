@@ -1,5 +1,6 @@
 from flask import Blueprint, request, url_for, redirect, render_template, flash, session, make_response, jsonify
 from flask_login import current_user, login_required
+import pdfkit, json
 import pdfkit
 from bson.objectid import ObjectId
 import random
@@ -10,7 +11,7 @@ import src.trending_recipe as trending_recipe_util
 from src.flask_files import forms
 from src.flask_files.database import mongo
 from src import api_options as Options
-from src.recipe_info import Recipe
+from src.recipe_info import Recipe, contains_intolerances
 from src.recipe_info_util import clean_summary
 from src.user_recipes import UserRecipe, decompress_data
 from src.recipe_recommend import get_similar_recipe
@@ -28,13 +29,15 @@ recommendation_db = db["recommendation"]
 search_history = db["SearchHistory"]
 
 
+@views.route("/clear", methods=['GET'])
+def clear():
+    trending_recipe_util.clear_cache()
+
 @views.route("/", methods=['GET'])
 def home_page():
     form = forms.SearchForm()
 
     trending_recipes = trending_recipe_util.get_trending_recipes()
-
-    print(trending_recipes)
 
     if current_user.is_authenticated:
 
@@ -141,15 +144,16 @@ def display_user_recipe(recipe_id):
     summary = recipe_info.description
     ingredients = recipe_info.ingredients
     instructions = recipe_info.instructions
-    time = recipe_info.time
+    prep_time = recipe_info.time
     owner = recipe_info.owner
     intolerances = [Options.IntoleranceOptions(x) for x in recipe_info.intolerances]
     favorite = False
+    matching_intolerances = None
 
     session["title"] = title
     session["ingredients"] = ingredients
     session["instructions"] = instructions
-    session["time"] = time
+    session["time"] = prep_time
 
     if current_user.is_authenticated:
         username = current_user.username
@@ -160,7 +164,7 @@ def display_user_recipe(recipe_id):
         user_favorites = user_favorites_info["favorites"]
         user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        contains_intolerances = set(user_intolerances).intersection(intolerances)
+        matching_intolerances = set(user_intolerances).intersection(intolerances)
 
         community_recipe_id = 'community/' + recipe_id
 
@@ -180,8 +184,8 @@ def display_user_recipe(recipe_id):
             return 'Action Completed'
 
     return render_template("user_recipe_info.html", title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions, time=time, owner=owner, favorite=favorite,
-                           contains_intolerances=contains_intolerances, recipe_id=recipe_id)
+                           instructions=instructions, time=prep_time, owner=owner, favorite=favorite,
+                           contains_intolerances=matching_intolerances, recipe_id=recipe_id)
 
 
 @views.route("/submit-recipe", methods=['GET', 'POST'])
@@ -192,7 +196,7 @@ def submit_recipe():
     if form.validate_on_submit():
         title = form.title.data
         description = form.description.data
-        time = form.time.data
+        prep_time = form.time.data
         ingredients = form.ingredients.data
         instructions = form.instructions.data
         diet = form.diet.data
@@ -208,7 +212,7 @@ def submit_recipe():
 
         recipe.set_title(title)
         recipe.set_description(description)
-        recipe.set_time(time)
+        recipe.set_time(prep_time)
         recipe.set_diets(diet)
         recipe.set_intolerances(intolerances)
         recipe.set_ingredients(ingredients)
@@ -265,7 +269,7 @@ def search():
         # ingredient filter
         ingredients = form.ingredients.data
 
-        #Cusine Filter
+        # cuisine Filter
         cuisines = form.Cuisines.data
 
         # custom filter
@@ -338,64 +342,98 @@ def search():
     return render_template('display_results.html', query=query, results=results, form=form)
 
 
-@views.route("/trending")
-def trending():
-    data = trending_recipe_util.get_trending_recipes()
+@views.route("/favorite/recipe/<recipe_id>", methods=['GET', 'POST'])
+def favorite_recipe(recipe_id):
 
-    return jsonify(data)
+    username = current_user.username
+
+    user_favorites_info = favorites_db.find_one({"username": username})
+    user_favorites = user_favorites_info["favorites"]
+
+    if request.method == 'POST':
+
+        title = request.form['title'].strip()
+
+        # Favorite recipe
+        if recipe_id in user_favorites:
+            del user_favorites[recipe_id]
+        else:
+            pass
+            user_favorites[recipe_id] = title
+
+        favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+
+        return 'Action Completed'
+
 
 @views.route("/recipe/<recipe_id>", methods=['GET', 'POST'])
 def display_recipe(recipe_id):
-
-    recipe_info = Recipe(recipe_id)
-    title = recipe_info.get_title()
-    summary = clean_summary(recipe_info.get_summary())
-    ingredients = recipe_info.get_ingredients()
-    instructions = recipe_info.get_instructions_list()
-    prep_time = recipe_info.get_prep_time()
-    price = recipe_info.get_total_Cost()
-    macros = recipe_info.get_Macros()
-    contains_intolerances = None
     favorite = False
+    title = None
 
-    trending_recipe_util.increment_view_count(recipe_id, title)
+    if request.method == 'POST':
 
-    if current_user.is_authenticated:
-        username = current_user.username
+        recipe_data = request.get_json()
+        title = recipe_data['title']
+        trending_recipe_util.increment_view_count(recipe_id, title)
 
-        user_favorites_info = favorites_db.find_one({"username": username})
-        user_preferences_info = preferences_db.find_one({"username": username})
+        if current_user.is_authenticated:
+            username = current_user.username
 
-        user_favorites = user_favorites_info["favorites"]
-        user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
+            user_favorites_info = favorites_db.find_one({"username": username})
+            user_preferences_info = preferences_db.find_one({"username": username})
 
-        contains_intolerances = recipe_info.contains_intolerances(user_intolerances)
+            user_favorites = user_favorites_info["favorites"]
+            user_intolerances = Options.idx_to_option(user_preferences_info["intolerances"], Options.IntoleranceOptions)
 
-        add_to_search_history(recipe_id, title)
+            add_to_search_history(recipe_id, title)
 
-        if recipe_id in user_favorites:
-            favorite = True
-
-        if request.method == 'POST':
-
-            # Favorite recipe
             if recipe_id in user_favorites:
-                del user_favorites[recipe_id]
-            else:
-                user_favorites[recipe_id] = title
+                favorite = True
 
-            favorites_db.update_one({"username": username}, {"$set": {"favorites": user_favorites}})
+            ingredients = recipe_data['ingredients']
+            dairy_free = recipe_data['dairyFree']
+            gluten_free = recipe_data["glutenFree"]
 
-            return 'Action Completed'
+            intolerances = contains_intolerances(ingredients, dairy_free, gluten_free, user_intolerances)
 
-    session["title"] = title
-    session["ingredients"] = ingredients
-    session["instructions"] = instructions
-    session["time"] = prep_time
+            return jsonify(intolerances)
 
-    return render_template('display_recipe.html', title=title, summary=summary, ingredients=ingredients,
-                           instructions=instructions, contains_intolerances=contains_intolerances, favorite=favorite,
-                           current_user=current_user, recipe_id=recipe_id,price = price, macros = macros)
+    return render_template('display_recipe.html', recipe_id=recipe_id, favorite=favorite)
+
+
+@views.route("/retrieve-recipe/<recipe_id>", methods=['GET', 'POST'])
+def retrieve_recipe(recipe_id):
+
+    recipe = Recipe(recipe_id)
+
+    recipe_info = {
+        "title": recipe.get_title(),
+        "summary": clean_summary(recipe.get_summary()),
+        "ingredients": recipe.get_ingredients(),
+        "instructions": recipe.get_instructions_list(),
+        "time": recipe.get_prep_time(),
+        "dairyFree": recipe.recipe_info["dairyFree"],
+        "glutenFree": recipe.recipe_info["glutenFree"],
+        "price": recipe.get_total_Cost(),
+        "macros": recipe.get_Macros()
+    }
+
+    session["title"] = recipe_info['title']
+    session["ingredients"] = recipe_info['ingredients']
+    session["instructions"] = recipe_info['instructions']
+    session["time"] = recipe_info['time']
+
+    response_data = jsonify(recipe_info)
+    response = make_response(response_data)
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+
+    # Handle conditional requests
+    if_none_match = request.headers.get('If-None-Match')
+    if if_none_match and if_none_match == response.headers.get('ETag'):
+        return '', 304  # Respond with 304 Not Modified if the data is still fresh
+
+    return response
 
 
 @views.route("/pdf")
@@ -403,9 +441,9 @@ def shopping_list():
     title = session["title"]
     ingredients = session["ingredients"]
     instructions = session["instructions"]
-    time = session["time"]
+    prep_time = session["time"]
 
-    rendered = render_template("shopping_list.html", title=title, time=time, ingredients=ingredients,
+    rendered = render_template("shopping_list.html", title=title, time=prep_time, ingredients=ingredients,
                                instructions=instructions)
 
     pdf = pdfkit.from_string(rendered, False)
