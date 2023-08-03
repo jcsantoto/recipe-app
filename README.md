@@ -35,6 +35,8 @@ Recipe: Displays information about the recipe such as
 - `recipe_info_util.py`: Contains various helper functions to aid in working with recipe info. This includes functions to check for certain allergens in an ingredients list and a function to clean up the summary of a recipe.
 - `search.py`: Contains a function for searching that takes in various parameters to customize the search. Also contains various helper functions to aid in retrieval and filtering of data.
 - `search_builder.py`: Helps build the API call for searching for recipes.
+- `trending_recipe.py`: Increments view counts of recipes and retrieves top 3 most viewed as trending.
+- `user_recipes.py`: Obtains information of a user created recipe using an ID and stores in a UserRecipe object. Contains several methods to retrieve different aspects of a recipe.
 
 
 ### src/flask_files
@@ -46,11 +48,14 @@ Recipe: Displays information about the recipe such as
 - `extensions.py`: Contains flask extensions and their instances.
 - `forms.py`: Contains classes for each type of form needed for the website such as the Login form and Registration form.
 - `models.py`: Contains a class that models a User by their username, email, and password.
+- `redis_util.py`: Contains code to instantiate Redis client object.
 - `views.py`: Contains code for flask routes that are not related authentication.
 
 ### src/static/js
 
 - `account.js`: Contains code to load account page info dynamically.
+- `additional_field.js`: Contains code to add additional ingredient and instruction fields for user created recipes.
+- `cache_recipe.js`: Contains code to store recipe date in JavaScript localStorage.
 - `favorite.js`: Contains code for an AJAX request to add a recipe to the favorites collection.
 - `tags.js`: Contains code to apply selectize from the Selectize library to input boxes.
 - `toggle.js`: Contains code to selectize and deselectize a search bar when clicking a toggle.
