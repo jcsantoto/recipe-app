@@ -53,6 +53,10 @@
                 {% if current_user.is_authenticated %}
 
                 <li class = "nav-item" style="margin-left: 10px;">
+                    <a class = "nav-link" href = "/community" id = "navItem">Community</a>
+                </li>
+
+                <li class = "nav-item" style="margin-left: 10px;">
                     <a class = "nav-link" href = "/account" id = "navItem">My Account</a>
                 </li>
 
@@ -78,7 +82,8 @@
 
             </ul>
 
-            <form class = "form-inline ms-auto" style = "margin-right: 5%;" action = "{{ url_for('views.search') }}" method="GET">
+            <form class = "form-inline ms-auto" style = "margin-right: 5%;" action = "/search" method="GET">
+                <input type = "radio" name = "mode" style = "display: none;" value = "1" checked>
                 <input class = "form-control mr-sm-2 opacity-75" name = "query" id = "searchNav" type = "search" placeholder = "Search by Name" aria-label = "Search" style = "background-color: rgb(99, 99, 99);">
             </form>
 
@@ -110,7 +115,7 @@
     <br>
     <br>
 
-    <div class="content">
+    <div id = "main-content" class="content">
         {% block content %}
         {% endblock %}
     </div>

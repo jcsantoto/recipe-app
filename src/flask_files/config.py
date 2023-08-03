@@ -6,3 +6,4 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     URI = os.environ.get('URI')
     sendgrid_key = os.environ.get('SENDGRID_API_KEY')
+    redis_password = os.environ.get('REDIS_PASSWORD')

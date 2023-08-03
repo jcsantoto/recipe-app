@@ -1,0 +1,21 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+
+
+
+    <div class = "container text-center">
+        <form class = "form-inline ms-auto" style = "margin-left: auto; margin-right: auto; margin-top: 1%; width: 75%;" action = "/community/search" method="GET">
+                        {{ form.query(id="toggle-search-bar", class="form-control form-control-lg search-bar") }}
+                        {{ form.submit() }}
+        </form>
+
+
+
+        <a href = "/submit-recipe"> Submit Recipe </a>
+
+    </div>
+
+
+{% endblock %}

@@ -14,6 +14,7 @@ db = client["recipeapp"]
 accounts_db = db["accounts"]
 preferences_db = db["preferences"]
 favorites_db = db["favorites"]
+search_history = db["SearchHistory"]
 email_confirmations = db["email_confirmations"]
 
 
@@ -40,11 +41,17 @@ def account_favorites():
 
     return render_template('account_favorites.html', favorites=favorites)
 
+@accounts.route("/account/history", methods=['GET', 'POST'])
+@login_required
+def account_history():
+    history = current_user.load_history()["recipes"]
+
+    return render_template('account_history.html', history=history)
+
 
 @accounts.route("/account/settings", methods=['GET', 'POST'])
 @login_required
 def account_settings():
-
     if not current_user.confirmed:
         flash("Please confirm your email before setting user preferences")
         return redirect("/account")
@@ -79,13 +86,22 @@ def account_settings():
         if form.username.data:
             accounts_db.update_one({"_id": user_info_id},
                                    {"$set": {"username": form.username.data}})
+
+            preferences_db.update_one({"username": username},
+                                   {"$set": {"username": form.username.data}})
+
+            favorites_db.update_one({"username": username},
+                                   {"$set": {"username": form.username.data}})
+
+            search_history.update_one({"username": username},
+                                   {"$set": {"username": form.username.data}})
+
             current_user.username = form.username.data
 
             require_relogin = True
 
         # Update email
         if form.email.data:
-
             # confirmation email
             token = email_util.generate_token(form.email.data, 'email-confirm')
             confirmation_link = email_util.generate_confirmation_link(token, "auth.confirm_change_email")
@@ -93,7 +109,7 @@ def account_settings():
             email_util.send_email(message)
 
             email_confirmations.insert_one({
-                "token":  token,
+                "token": token,
                 "id": user_info_id,
                 "email": form.email.data
             })
